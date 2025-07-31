@@ -1,3 +1,8 @@
+<?php
+include('connection.php');
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -30,14 +35,14 @@
             </button>
           </div>
 
-          <a href="index.html" class="mobile-menu-logo header-element">
+          <a href="index.php" class="mobile-menu-logo header-element">
             ESSENCE
           </a>
 
           <nav class="header-nav">
-            <a href="index.html" class="nav-link header-element">Home</a>
-            <a href="loja.html" class="nav-link header-element">Loja</a>
-            <a href="sobre.html" class="nav-link header-element">Sobre</a>
+            <a href="index.php" class="nav-link header-element">Home</a>
+            <a href="loja.php" class="nav-link header-element">Loja</a>
+            <a href="sobre.php" class="nav-link header-element">Sobre</a>
           </nav>
 
           <div class="header-actions">
@@ -45,7 +50,7 @@
               <i data-lucide="search"></i>
             </button>
             <a
-              href="perfil.html"
+              href="perfil.php"
               id="user-profile-icon"
               aria-label="Perfil do usuário"
               class="header-element"
@@ -53,7 +58,7 @@
               <i data-lucide="user"></i>
             </a>
             <a
-              href="carrinho.html"
+              href="carrinho.php"
               aria-label="Carrinho de compras"
               class="cart-button header-element"
             >
@@ -66,9 +71,9 @@
 
       <div id="mobile-menu" class="mobile-menu hidden">
         <nav class="mobile-menu-nav">
-          <a href="index.html" class="nav-link">Home</a>
-          <a href="loja.html" class="nav-link">Loja</a>
-          <a href="sobre.html" class="nav-link">Sobre</a>
+          <a href="index.php" class="nav-link">Home</a>
+          <a href="loja.php" class="nav-link">Loja</a>
+          <a href="sobre.php" class="nav-link">Sobre</a>
         </nav>
       </div>
     </header>
@@ -90,7 +95,7 @@
         <div class="banner-overlay">
           <h1>Premium Streetwear</h1>
           <p>Elevate Your Style</p>
-          <a href="loja.html" class="btn-banner">SHOP</a>
+          <a href="loja.php" class="btn-banner">SHOP</a>
         </div>
       </div>
       <section class="section-hero bg-main">
@@ -100,7 +105,7 @@
             Design construído para o agora. Peças limitadas para um estilo
             autêntico.
           </p>
-          <a href="loja.html" class="btn-primary"> Explorar Coleção </a>
+          <a href="loja.php" class="btn-primary"> Explorar Coleção </a>
         </div>
       </section>
       <section class="section bg-main">
@@ -129,7 +134,7 @@
                 limpo e materiais de alta performance. Cada peça é uma
                 declaração.
               </p>
-              <a href="sobre.html">A Nossa Visão</a>
+              <a href="sobre.php">A Nossa Visão</a>
             </div>
           </div>
         </div>

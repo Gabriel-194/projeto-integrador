@@ -1,9 +1,15 @@
+<?php
+include('connection.php');
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Perfil | Essence Wear</title>
+    <title>Carrinho | Essence Wear</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,24 +33,24 @@
                     </button>
                 </div>
                 
-                <a href="index.html" class="mobile-menu-logo header-element">
+                <a href="index.php" class="mobile-menu-logo header-element">
                     ESSENCE
                 </a>
                 
                 <nav class="header-nav">
-                    <a href="index.html" class="nav-link header-element">Home</a>
-                    <a href="loja.html" class="nav-link header-element">Loja</a>
-                    <a href="sobre.html" class="nav-link header-element">Sobre</a>
+                    <a href="index.php" class="nav-link header-element">Home</a>
+                    <a href="loja.php" class="nav-link header-element">Loja</a>
+                    <a href="sobre.php" class="nav-link header-element">Sobre</a>
                 </nav>
                 
                 <div class="header-actions">
-                    <button id="search-btn" aria-label="Pesquisar" class="header-element">
+                    <button aria-label="Pesquisar" class="header-element">
                         <i data-lucide="search"></i>
                     </button>
-                    <a href="perfil.html" id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
+                    <a href="perfil.php" id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
                         <i data-lucide="user"></i>
                     </a>
-                    <a href="carrinho.html" aria-label="Carrinho de compras" class="cart-button header-element">
+                    <a href="carrinho.php" aria-label="Carrinho de compras" class="cart-button header-element">
                         <i data-lucide="shopping-cart"></i>
                         <span id="cart-count">0</span>
                     </a>
@@ -54,15 +60,15 @@
         
         <div id="mobile-menu" class="mobile-menu hidden">
             <nav class="mobile-menu-nav">
-                <a href="index.html" class="nav-link">Home</a>
-                <a href="loja.html" class="nav-link">Loja</a>
-                <a href="sobre.html" class="nav-link">Sobre</a>
+                <a href="index.php" class="nav-link">Home</a>
+                <a href="loja.php" class="nav-link">Loja</a>
+                <a href="sobre.php" class="nav-link">Sobre</a>
             </nav>
         </div>
     </header>
 
     <main>
-        <div id="profile-page-container" class="profile-page container">
+        <div id="carrinho-container" class="cart-page container">
             </div>
     </main>
 
@@ -71,7 +77,6 @@
             <p>&copy; 2025 ESSENCE WEAR. TODOS OS DIREITOS RESERVADOS.</p>
         </div>
     </footer>
-    
     <div id="search-overlay" class="search-overlay">
         <div class="search-modal">
             <div class="search-header">
@@ -85,10 +90,9 @@
                 <input type="text" id="search-input" placeholder="O que você procura?">
             </div>
             <div id="search-results-container" class="search-results-container">
-            </div>
+                </div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>

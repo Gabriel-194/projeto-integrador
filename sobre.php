@@ -1,9 +1,16 @@
+<?php
+include('connection.php');
+
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrinho | Essence Wear</title>
+    <title>Sobre Nós | Essence Wear</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,43 +34,49 @@
                     </button>
                 </div>
                 
-                <a href="index.html" class="mobile-menu-logo header-element">
+                <a href="index.php" class="mobile-menu-logo header-element">
                     ESSENCE
                 </a>
                 
                 <nav class="header-nav">
-                    <a href="index.html" class="nav-link header-element">Home</a>
-                    <a href="loja.html" class="nav-link header-element">Loja</a>
-                    <a href="sobre.html" class="nav-link header-element">Sobre</a>
+                    <a href="index.php" class="nav-link header-element">Home</a>
+                    <a href="loja.php" class="nav-link header-element">Loja</a>
+                    <a href="sobre.php" class="nav-link header-element">Sobre</a>
                 </nav>
                 
                 <div class="header-actions">
                     <button aria-label="Pesquisar" class="header-element">
                         <i data-lucide="search"></i>
                     </button>
-                    <a href="perfil.html" id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
+                    <a href="perfil.php" id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
                         <i data-lucide="user"></i>
                     </a>
-                    <a href="carrinho.html" aria-label="Carrinho de compras" class="cart-button header-element">
+                    <a href="carrinho.php" aria-label="Carrinho de compras" class="cart-button header-element">
                         <i data-lucide="shopping-cart"></i>
                         <span id="cart-count">0</span>
                     </a>
-                </div>
+                </div>  
             </div>
         </div>
         
         <div id="mobile-menu" class="mobile-menu hidden">
             <nav class="mobile-menu-nav">
-                <a href="index.html" class="nav-link">Home</a>
-                <a href="loja.html" class="nav-link">Loja</a>
-                <a href="sobre.html" class="nav-link">Sobre</a>
+                <a href="index.php" class="nav-link">Home</a>
+                <a href="loja.php" class="nav-link">Loja</a>
+                <a href="sobre.php" class="nav-link">Sobre</a>
             </nav>
         </div>
     </header>
 
     <main>
-        <div id="carrinho-container" class="cart-page container">
+        <div class="about-page container">
+            <h1>Sobre a Essence</h1>
+            <div class="divider"></div>
+            <div class="about-text">
+                <p>A Essence Wear foi fundada em 2023 sob um princípio fundamental: criar mais com menos. Num mundo saturado por ciclos de moda rápidos e descartáveis, a nossa proposta é um retorno ao essencial. Focamo-nos em design atemporal, funcionalidade e uma estética minimalista que resiste ao teste do tempo.</p>
+                <p>Cada coleção é uma edição limitada, produzida com responsabilidade e atenção aos detalhes. Não somos uma marca de fast-fashion. Somos uma plataforma para a autoexpressão através de peças que servem como uma tela em branco para o seu estilo pessoal. Acreditamos que a verdadeira confiança vem de vestir algo que não apenas parece bom, mas que também representa uma escolha consciente.</p>
             </div>
+        </div>
     </main>
 
     <footer class="footer">

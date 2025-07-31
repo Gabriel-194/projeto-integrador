@@ -1,3 +1,10 @@
+<?php
+include('connection.php');
+
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -27,24 +34,26 @@
                     </button>
                 </div>
                 
-                <a href="index.html" class="mobile-menu-logo header-element">
+                <a href="index.php" class="mobile-menu-logo header-element">
                     ESSENCE
                 </a>
                 
                 <nav class="header-nav">
-                    <a href="index.html" class="nav-link header-element">Home</a>
-                    <a href="loja.html" class="nav-link header-element">Loja</a>
-                    <a href="sobre.html" class="nav-link header-element">Sobre</a>
+                    <a href="index.php" class="nav-link header-element">Home</a>
+                    <a href="loja.php" class="nav-link header-element">Loja</a>
+                    <a href="sobre.php" class="nav-link header-element">Sobre</a>
                 </nav>
                 
                 <div class="header-actions">
                     <button id="search-btn" aria-label="Pesquisar" class="header-element">
                         <i data-lucide="search"></i>
                     </button>
-                     <a href="perfil.html" id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
+                     <a href="perfil.php
+                     " id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
                         <i data-lucide="user"></i>
                     </a>
-                    <a href="carrinho.html" aria-label="Carrinho de compras" class="cart-button header-element">
+                    <a href="carrinho.php
+                    " aria-label="Carrinho de compras" class="cart-button header-element">
                         <i data-lucide="shopping-cart"></i>
                         <span id="cart-count">0</span>
                     </a>
@@ -54,9 +63,9 @@
         
         <div id="mobile-menu" class="mobile-menu hidden">
             <nav class="mobile-menu-nav">
-                <a href="index.html" class="nav-link">Home</a>
-                <a href="loja.html" class="nav-link">Loja</a>
-                <a href="sobre.html" class="nav-link">Sobre</a>
+                <a href="index.php" class="nav-link">Home</a>
+                <a href="loja.php" class="nav-link">Loja</a>
+                <a href="sobre.php" class="nav-link">Sobre</a>
             </nav>
         </div>
     </header>
