@@ -1,11 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     // --- CONFIGURAÇÕES GLOBAIS ---
-    const API_BASE_URL = 'api'; // Pasta onde seus scripts da API estão
+    const API_BASE_URL = 'api'; 
 
     // --- GERENCIAMENTO DE ESTADO NO NAVEGADOR ---
-    // O carrinho continua no localStorage para simplicidade até o checkout.
     let cart = JSON.parse(localStorage.getItem("essenceCart")) || [];
-    // O usuário logado fica na 'sessionStorage' (dura apenas enquanto a aba estiver aberta).
     let currentUser = JSON.parse(sessionStorage.getItem("essenceCurrentUser")) || null;
 
     const saveCart = () => localStorage.setItem("essenceCart", JSON.stringify(cart));
@@ -65,22 +63,44 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- LÓGICA ESPECÍFICA DE CADA PÁGINA ---
     // =================================================================
 
-// --- FUNÇÃO GENÉRICA PARA BUSCAR PRODUTOS ---
-const fetchProducts = async () => {
-    try {
-        // --- CORREÇÃO AQUI --- Removido o "/products" do caminho
-        const response = await fetch(`${API_BASE_URL}/get_products.php`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        // Esta mensagem de erro deve aparecer na consola do navegador (F12)
-        console.error("Falha ao buscar produtos da API:", error);
-        return []; // Retorna um array vazio em caso de erro
-    }
-};
+    // --- FUNÇÃO GENÉRICA PARA BUSCAR PRODUTOS ---
+    const fetchProducts = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/get_products.php`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error("Falha ao buscar produtos da API:", error);
+            return [];
+        }
+    };
+    
+    // --- NOVO: LÓGICA DO BANNER ROTATIVO ---
+    const initBanner = () => {
+        const slides = document.querySelectorAll(".banner-slide");
+        if (slides.length < 2) return; // Não faz nada se houver menos de 2 slides
+        
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+        
+        const showSlide = (index) => {
+            slides.forEach((slide, i) => {
+                slide.classList.remove("active");
+                if (i === index) {
+                    slide.classList.add("active");
+                }
+            });
+        };
+        
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }, 3000); // Muda de slide a cada 5 segundos
+    };
 
     // --- PÁGINA INICIAL ---
     const initHomePage = async () => {
+        initBanner(); // Adicionando a inicialização do banner aqui
         const homeGrid = document.getElementById("home-products-grid");
         if (homeGrid) {
             homeGrid.innerHTML = "<p>Carregando lançamentos...</p>";
@@ -97,7 +117,7 @@ const fetchProducts = async () => {
         if (shopGrid) {
             shopGrid.innerHTML = "<p>Carregando todos os produtos...</p>";
             const allProducts = await fetchProducts();
-            renderProducts(shopGrid, allProducts); // Renderiza todos inicialmente
+            renderProducts(shopGrid, allProducts);
 
             const filterProducts = (category) => {
                 if (category === "Todos") {
@@ -117,137 +137,123 @@ const fetchProducts = async () => {
             });
         }
     };
-  
+ 
     // --- PÁGINA DE PRODUTO ---
-// No script.js, substitua a função initProductPage por esta
-const initProductPage = async () => {
-    const container = document.getElementById("product-detail-container");
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get("id");
+    const initProductPage = async () => {
+        const container = document.getElementById("product-detail-container");
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get("id");
 
-    if (!productId) {
-        container.innerHTML = `<p>Produto inválido. <a href="loja.php">Voltar para a loja</a>.</p>`;
-        return;
-    }
-
-    container.innerHTML = "<p>Carregando detalhes do produto...</p>";
-
-    try {
-        // Nova chamada à API específica
-        const response = await fetch(`${API_BASE_URL}/products/get_product_details.php?id=${productId}`);
-        const result = await response.json();
-
-        if (result.success) {
-            const product = result.data;
-            // A descrição agora vem do banco de dados!
-            container.innerHTML = `
-                <div class="product-detail-content">
-                    <div class="product-images"><img id="main-product-image" src="${product.imagem_principal}" alt="${product.nome}"></div>
-                    <div class="product-info">
-                        <h1>${product.nome}</h1>
-                        <p class="price">${formatPrice(product.preco)}</p>
-                        <p class="description">${product.descricao || 'Descrição não disponível.'}</p>
-                        <div class="add-to-cart-section">
-                            <button class="add-cart-btn btn-primary" data-product-id="${product.id}" data-product-name="${product.nome}" data-product-price="${product.preco}" data-product-image="${product.imagem_principal}">Adicionar ao Carrinho</button>
-                        </div>
-                    </div>
-                </div>`;
-        } else {
-            throw new Error(result.message);
+        if (!productId) {
+            container.innerHTML = `<p>Produto inválido. <a href="loja.php">Voltar para a loja</a>.</p>`;
+            return;
         }
-    } catch(error) {
-        container.innerHTML = `<p>Erro ao carregar produto: ${error.message} <a href="loja.php">Voltar para a loja</a>.</p>`;
-    }
-};
+
+        container.innerHTML = "<p>Carregando detalhes do produto...</p>";
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/products/get_product_details.php?id=${productId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const product = result.data;
+                container.innerHTML = `
+                    <div class="product-detail-content">
+                        <div class="product-images"><img id="main-product-image" src="${product.imagem_principal}" alt="${product.nome}"></div>
+                        <div class="product-info">
+                            <h1>${product.nome}</h1>
+                            <p class="price">${formatPrice(product.preco)}</p>
+                            <p class="description">${product.descricao || 'Descrição não disponível.'}</p>
+                            <div class="add-to-cart-section">
+                                <button class="add-cart-btn btn-primary" data-product-id="${product.id}" data-product-name="${product.nome}" data-product-price="${product.preco}" data-product-image="${product.imagem_principal}">Adicionar ao Carrinho</button>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                throw new Error(result.message);
+            }
+        } catch(error) {
+            container.innerHTML = `<p>Erro ao carregar produto: ${error.message} <a href="loja.php">Voltar para a loja</a>.</p>`;
+        }
+    };
 
     // --- PÁGINA DE LOGIN E CADASTRO ---
-    // --- PÁGINA DE LOGIN E CADASTRO ---
-// --- PÁGINA DE LOGIN E CADASTRO ---
-const initLoginPage = () => {
-    // Se o usuário já estiver logado, redireciona para o perfil
-    if (currentUser) {
-        window.location.href = 'perfil.php';
-        return;
-    }
+    const initLoginPage = () => {
+        if (currentUser) {
+            window.location.href = 'perfil.php';
+            return;
+        }
 
-    const loginForm = document.getElementById("login-form");
-    const registerForm = document.getElementById("register-form");
+        const loginForm = document.getElementById("login-form");
+        const registerForm = document.getElementById("register-form");
 
-    // --- LÓGICA DO FORMULÁRIO DE LOGIN ---
-    if (loginForm) {
-        loginForm.addEventListener("submit", async (e) => {
-            e.preventDefault(); // Impede o recarregamento da página
+        if (loginForm) {
+            loginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
 
-            // --- ALTERAÇÃO 1: A variável agora se chama 'username' para maior clareza ---
-            const username = document.getElementById("login-username").value;
-            const password = document.getElementById("login-password").value;
-            const errorMsg = document.getElementById("login-error");
+                const username = document.getElementById("login-username").value;
+                const password = document.getElementById("login-password").value;
+                const errorMsg = document.getElementById("login-error");
 
-            errorMsg.classList.add("hidden");
+                errorMsg.classList.add("hidden");
 
-            try {
-                // 1. FAZ O FETCH PARA A API DE LOGIN
-                const response = await fetch(`${API_BASE_URL}/auth/login.php`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    // --- ALTERAÇÃO 2: Enviamos o 'username' em vez de 'email' ---
-                    body: JSON.stringify({ username: username, password: password })
-                });
+                try {
+                    const response = await fetch(`${API_BASE_URL}/auth/login.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: username, password: password })
+                    });
 
-                const result = await response.json();
+                    const result = await response.json();
 
-                // 2. VERIFICA O RESULTADO DA API
-                if (result.success) {
-                    // 3. SE O LOGIN FOR BEM-SUCEDIDO:
-                    saveCurrentUser(result.user);
-                    window.location.href = 'perfil.php';
-                } else {
-                    throw new Error(result.message || "Ocorreu um erro desconhecido.");
+                    if (result.success) {
+                        saveCurrentUser(result.user);
+                        window.location.href = 'perfil.php';
+                    } else {
+                        throw new Error(result.message || "Ocorreu um erro desconhecido.");
+                    }
+
+                } catch (error) {
+                    errorMsg.textContent = error.message;
+                    errorMsg.classList.remove("hidden");
                 }
+            });
+        }
 
-            } catch (error) {
-                errorMsg.textContent = error.message;
-                errorMsg.classList.remove("hidden");
-            }
-        });
-    }
+        if (registerForm) {
+            registerForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const name = document.getElementById("register-name").value;
+                const email = document.getElementById("register-email").value;
+                const password = document.getElementById("register-password").value;
+                const successMsg = document.getElementById("register-success");
+                const errorMsg = document.getElementById("register-error");
+                
+                errorMsg.classList.add("hidden");
+                successMsg.classList.add("hidden");
 
-    // A lógica de registro continua a mesma, pois ela já envia 'name', 'email' e 'password'.
-    if (registerForm) {
-        // ... (o seu código do formulário de registro permanece igual)
-        registerForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const name = document.getElementById("register-name").value;
-            const email = document.getElementById("register-email").value;
-            const password = document.getElementById("register-password").value;
-            const successMsg = document.getElementById("register-success");
-            const errorMsg = document.getElementById("register-error");
-            
-            errorMsg.classList.add("hidden");
-            successMsg.classList.add("hidden");
+                try {
+                    const response = await fetch(`${API_BASE_URL}/auth/register.php`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    const result = await response.json();
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/auth/register.php`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name, email, password })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    successMsg.textContent = result.message + " Faça o login para continuar.";
-                    successMsg.classList.remove("hidden");
-                    registerForm.reset();
-                } else {
-                    throw new Error(result.message || "Ocorreu um erro desconhecido.");
+                    if (result.success) {
+                        successMsg.textContent = result.message + " Faça o login para continuar.";
+                        successMsg.classList.remove("hidden");
+                        registerForm.reset();
+                    } else {
+                        throw new Error(result.message || "Ocorreu um erro desconhecido.");
+                    }
+                } catch(error) {
+                    errorMsg.textContent = error.message;
+                    errorMsg.classList.remove("hidden");
                 }
-            } catch(error) {
-                errorMsg.textContent = error.message;
-                errorMsg.classList.remove("hidden");
-            }
-        });
-    }
-};
+            });
+        }
+    };
 
     // --- PÁGINA DE PERFIL ---
     const initProfilePage = () => {
@@ -257,7 +263,6 @@ const initLoginPage = () => {
             return;
         }
 
-        // A lógica do painel de admin também precisará de APIs para adicionar/remover produtos
         container.innerHTML = `
             <h1>Olá, ${currentUser.name.split(' ')[0]}</h1>
             <div class="profile-info">
@@ -313,7 +318,6 @@ const initLoginPage = () => {
         updateCartCount();
         lucide.createIcons();
         
-        // Roteamento simples baseado no ID de um elemento principal da página
         if (document.getElementById("home-products-grid")) initHomePage();
         if (document.getElementById("shop-products-grid")) initShopPage();
         if (document.getElementById("product-detail-container")) initProductPage();
@@ -324,7 +328,6 @@ const initLoginPage = () => {
         document.body.addEventListener("click", (e) => {
             const target = e.target;
             
-            // Adicionar ao carrinho
             if (target.matches('.add-cart-btn')) {
                 e.preventDefault();
                 const productId = target.dataset.productId;
@@ -351,13 +354,12 @@ const initLoginPage = () => {
                 }, 2000);
             }
 
-            // Remover do carrinho
             if (target.matches('.remove-cart-item-btn')) {
                 const itemIndex = parseInt(target.dataset.index, 10);
                 cart.splice(itemIndex, 1);
                 saveCart();
                 updateCartCount();
-                renderCartPage(); // Re-renderiza a página do carrinho
+                renderCartPage();
             }
         });
     };

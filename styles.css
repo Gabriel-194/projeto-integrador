@@ -64,6 +64,12 @@ img {
 
 
 /* Layout do Container */
+
+.container-botao {
+    margin-top: 100px;
+    margin-left: 43%;
+}
+
 .container {
     width: 100%;
     margin-left: auto;
@@ -99,7 +105,7 @@ header.scrolled {
     position: sticky;
     top: 0;
     z-index: 40;
-    background-color: rgba(0, 0, 0, 0.10); /* Fundo branco translúcido por padrão */
+    background-color: rgb(255, 255, 255); /* Fundo branco translúcido por padrão */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* Borda escura */
