@@ -15,12 +15,14 @@ if (empty($nome) || empty($email) || empty($senha)) {
     exit;
 }
 
-// **SEGURANÇA:** Criptografa a senha antes de salvar.
-$senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+// --- ALTERAÇÃO AQUI ---
+// A senha agora é guardada diretamente, sem criptografia.
+$senha_a_salvar = $senha;
 
 // Prepara o SQL para evitar ataques de SQL Injection
 $stmt = $conn->prepare("INSERT INTO clientes (nome_completo, email, senha_hash) VALUES (?, ?, ?)");
-$stmt->bind_param("sss", $nome, $email, $senha_hash);
+// A coluna 'senha_hash' agora vai receber a senha em texto puro.
+$stmt->bind_param("sss", $nome, $email, $senha_a_salvar);
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true, 'message' => 'Cadastro realizado com sucesso!']);
