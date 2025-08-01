@@ -127,4 +127,4 @@ ADD COLUMN `is_admin` BOOLEAN NOT NULL DEFAULT FALSE AFTER `senha_hash`;
 
 -- Insere o utilizador 'admin' com a senha 'admin123' (já criptografada) e marca-o como administrador.
 INSERT INTO `clientes` (`nome_completo`, `email`, `senha_hash`, `is_admin`) VALUES
-('Administrador', 'admin@esssence.com', '$2y$10$w0nJdMh7M6lS5BfX.Gq.e.wGgG8nU0e3qB7fS0lY9mC3zN4o.J3j2', 1);
+('admin', 'admin@esssence.com', '$2y$10$w0nJdMh7M6lS5BfX.Gq.e.wGgG8nU0e3qB7fS0lY9mC3zN4o.J3j2', 1);
