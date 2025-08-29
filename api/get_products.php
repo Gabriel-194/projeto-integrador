@@ -5,20 +5,19 @@ require_once('../connection.php');
 // Define que a resposta será no formato JSON
 header('Content-Type: application/json');
 
-// --- ALTERAÇÃO: Usando LEFT JOIN para incluir o nome da categoria ---
-// A consulta agora busca o nome da categoria (c.nome) e o renomeia para "categoria"
-$sql = "SELECT 
-            p.id, 
-            p.nome, 
+// Usando LEFT JOIN para incluir o nome da categoria na resposta
+$sql = "SELECT
+            p.id,
+            p.nome,
             p.descricao,
-            p.preco, 
-            p.imagem_principal, 
-            c.nome AS categoria 
-        FROM 
-            produtos p 
-        LEFT JOIN 
+            p.preco,
+            p.imagem_principal,
+            c.nome AS categoria
+        FROM
+            produtos p
+        LEFT JOIN
             categorias c ON p.categoria_id = c.id
-        WHERE 
+        WHERE
             p.ativo = TRUE";
 
 $result = $conn->query($sql);

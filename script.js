@@ -58,12 +58,45 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "index.php";
     };
 
+    const showLoginRequiredModal = () => {
+        // Remove qualquer modal antigo para não duplicar
+        const existingModal = document.getElementById('login-required-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
 
-    // =================================================================
-    // --- LÓGICA ESPECÍFICA DE CADA PÁGINA ---
-    // =================================================================
+        // Cria a estrutura do modal
+        const modalOverlay = document.createElement('div');
+        modalOverlay.id = 'login-required-modal';
+        modalOverlay.className = 'custom-modal-overlay open';
+        
+        modalOverlay.innerHTML = `
+            <div class="custom-modal">
+                <h3>Login Necessário</h3>
+                <p>Você precisa estar logado para adicionar produtos ao carrinho.</p>
+                <div class="modal-actions">
+                    <button id="modal-go-to-login" class="btn-primary">Ir para Login</button>
+                    <button id="modal-close-btn" class="btn-secondary">Fechar</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modalOverlay);
 
-    // --- FUNÇÃO GENÉRICA PARA BUSCAR PRODUTOS ---
+        // Adiciona os eventos para os botões do novo modal
+        document.getElementById('modal-go-to-login').addEventListener('click', () => {
+            window.location.href = 'login.php';
+        });
+        
+        const closeModal = () => modalOverlay.remove();
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    };
+
     const fetchProducts = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/get_products.php`);
@@ -74,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return [];
         }
     };
+
     
     // --- NOVO: LÓGICA DO BANNER ROTATIVO ---
     const initBanner = () => {
@@ -98,6 +132,55 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000); // Muda de slide a cada 5 segundos
     };
 
+    const initSearch = () => {
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchInput = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('search-results-container');
+        const openSearchButtons = document.querySelectorAll('button[aria-label="Pesquisar"]');
+        const closeSearchBtn = document.getElementById('search-close-btn');
+
+        if (!searchOverlay) return;
+
+        const openSearch = () => searchOverlay.classList.add('open');
+        const closeSearch = () => searchOverlay.classList.remove('open');
+
+        openSearchButtons.forEach(btn => btn.addEventListener('click', openSearch));
+        closeSearchBtn.addEventListener('click', closeSearch);
+        searchOverlay.addEventListener('click', (e) => {
+            if (e.target === searchOverlay) {
+                closeSearch();
+            }
+        });
+        
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            const searchTerm = searchInput.value.trim();
+
+            if (searchTerm.length < 2) {
+                resultsContainer.innerHTML = '<p class="search-no-results">Digite pelo menos 2 caracteres para buscar.</p>';
+                return;
+            }
+
+            resultsContainer.innerHTML = '<p class="search-no-results">Buscando...</p>';
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/search_products.php?term=${encodeURIComponent(searchTerm)}`);
+                    const products = await response.json();
+                    
+                    if (products.length > 0) {
+                         resultsContainer.innerHTML = `<div class="products-grid">${products.map(createProductCard).join('')}</div>`;
+                    } else {
+                         resultsContainer.innerHTML = `<p class="search-no-results">Nenhum produto encontrado para "<strong>${searchTerm}</strong>".</p>`;
+                    }
+                } catch (error) {
+                    console.error('Erro na busca:', error);
+                    resultsContainer.innerHTML = '<p class="search-no-results">Ocorreu um erro ao realizar a busca.</p>';
+                }
+            }, 300); // Espera 300ms após o usuário parar de digitar
+        });
+    };
     // --- PÁGINA INICIAL ---
     const initHomePage = async () => {
         initBanner(); // Adicionando a inicialização do banner aqui
@@ -310,18 +393,118 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="cart-items-list">${cartItemsHTML}</div>
             <div class="cart-summary">
                 <h3>Total: ${formatPrice(totalPrice)}</h3>
-                <button class="btn-primary">Finalizar Compra</button>
+                <a href="checkout.php" class="btn-primary">Finalizar Compra</a>
             </div>`;
     };
 
     // =================================================================
     // --- INICIALIZAÇÃO E EVENT LISTENERS GLOBAIS ---
     // =================================================================
+    // --- PÁGINA DE CHECKOUT ---
+const initCheckoutPage = () => {
+    const container = document.getElementById('checkout-container');
+    if (!container) return;
 
+    if (!currentUser) {
+        window.location.href = 'login.php';
+        return;
+    }
+    if (cart.length === 0) {
+        container.innerHTML = '<p>Seu carrinho está vazio. Redirecionando para a loja...</p>';
+        setTimeout(() => window.location.href = 'loja.php', 2000);
+        return;
+    }
+
+    const renderCheckout = (addresses) => {
+        const cartSummaryHTML = cart.map(item => `
+            <div class="summary-item">
+                <img src="${item.image}" alt="${item.name}">
+                <div class="summary-item-details">
+                    <p>${item.name}</p>
+                    <span>${item.quantity} x ${formatPrice(item.price)}</span>
+                </div>
+            </div>
+        `).join('');
+
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+        const addressesHTML = addresses.length > 0 ? addresses.map((addr, index) => `
+            <label class="address-option">
+                <input type="radio" name="address" value="${addr.id}" ${index === 0 ? 'checked' : ''}>
+                <div>
+                    <strong>${addr.logradouro}, ${addr.numero}</strong><br>
+                    ${addr.bairro}, ${addr.cidade} - ${addr.estado}<br>
+                    CEP: ${addr.cep}
+                </div>
+            </label>
+        `).join('') : '<p>Nenhum endereço cadastrado. <a href="perfil.php">Adicionar endereço</a></p>';
+
+        container.innerHTML = `
+            <div class="checkout-layout">
+                <div class="checkout-details">
+                    <h3>Endereço de Entrega</h3>
+                    <div class="address-selection">${addressesHTML}</div>
+                </div>
+                <div class="checkout-summary">
+                    <h3>Resumo do Pedido</h3>
+                    <div class="summary-items">${cartSummaryHTML}</div>
+                    <div class="summary-total">
+                        <strong>Total:</strong>
+                        <strong>${formatPrice(total)}</strong>
+                    </div>
+                    <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Finalizar Pedido</button>
+                </div>
+            </div>
+        `;
+    };
+
+    // Busca os endereços e renderiza a página
+    fetch(`${API_BASE_URL}/users/get_addresses.php`)
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                renderCheckout(result.data);
+
+                const placeOrderBtn = document.getElementById('place-order-btn');
+                placeOrderBtn.addEventListener('click', async () => {
+                    const selectedAddress = document.querySelector('input[name="address"]:checked');
+                    if (!selectedAddress) {
+                        alert('Por favor, selecione um endereço de entrega.');
+                        return;
+                    }
+
+                    placeOrderBtn.disabled = true;
+                    placeOrderBtn.textContent = 'Processando...';
+
+                    const response = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            address_id: selectedAddress.value,
+                            cart: cart
+                        })
+                    });
+                    const orderResult = await response.json();
+
+                    if (orderResult.success) {
+                        cart = []; // Limpa o carrinho
+                        saveCart();
+                        updateCartCount();
+                        window.location.href = 'order_confirmation.php';
+                    } else {
+                        alert('Erro ao finalizar o pedido: ' + orderResult.message);
+                        placeOrderBtn.disabled = false;
+                        placeOrderBtn.textContent = 'Finalizar Pedido';
+                    }
+                });
+            }
+        });
+    };
     const init = () => {
         updateUserIcon();
         updateCartCount();
         lucide.createIcons();
+        initSearch();
         
         if (document.getElementById("home-products-grid")) initHomePage();
         if (document.getElementById("shop-products-grid")) initShopPage();
@@ -329,12 +512,22 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.getElementById("login-form")) initLoginPage();
         if (document.getElementById("profile-page-container")) initProfilePage();
         if (document.getElementById("carrinho-container")) renderCartPage();
+        if (document.getElementById("checkout-container")) initCheckoutPage();
 
         document.body.addEventListener("click", (e) => {
             const target = e.target;
             
             if (target.matches('.add-cart-btn')) {
                 e.preventDefault();
+
+                // --- VERIFICAÇÃO DE LOGIN (NOVO) ---
+                if (!currentUser) {
+                    showLoginRequiredModal();
+                    return; // Para a execução aqui se o usuário não estiver logado
+                }
+                // --- FIM DA VERIFICAÇÃO ---
+
+                // O código abaixo só será executado se o usuário estiver logado
                 const productId = target.dataset.productId;
                 const existingItem = cart.find(item => item.productId === productId);
 
