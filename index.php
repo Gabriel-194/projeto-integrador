@@ -35,7 +35,7 @@
 
     <nav class="header-nav">
     <a href="index.php" class="nav-link header-element">Home</a>
-    <a href="loja.php" class="nav-link header-element">Loja</a>
+    <a href="loja.php" class="nav-link header-element">Produtos</a>
     <a href="sobre.php" class="nav-link header-element">Sobre</a>
     </nav>
 
@@ -66,7 +66,7 @@
       <div id="mobile-menu" class="mobile-menu hidden">
       <nav class="mobile-menu-nav">
       <a href="index.php" class="nav-link">Home</a>
-      <a href="loja.php" class="nav-link">Loja</a>
+      <a href="loja.php" class="nav-link">Produtos</a>
       <a href="sobre.php" class="nav-link">Sobre</a>
       </nav>
       </div>
