@@ -71,10 +71,10 @@ include('connection.php');
             <h1>Todos os Produtos</h1>
             <div class="filter-buttons">
                 <button class="filter-btn btn-primary" data-category="Todos">Todos</button>
-                <button class="filter-btn btn-secondary" data-category="Blusas">Blusas</button>
+                <button class="filter-btn btn-secondary" data-category="Blusa">Blusas</button>
                 <button class="filter-btn btn-secondary" data-category="Camisetas">Camisetas</button>
                 <button class="filter-btn btn-secondary" data-category="Bermudas">Bermudas</button>
-                <button class="filter-btn btn-secondary" data-category="Calcas">Calças</button>
+                <button class="filter-btn btn-secondary" data-category="Calças">Calças</button>
                 <button class="filter-btn btn-secondary" data-category="Tenis">Tênis</button>
             </div>
             <div id="shop-products-grid" class="products-grid">

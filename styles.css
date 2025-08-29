@@ -928,7 +928,7 @@ body:not(.body-over-banner) .logo-text {
 /* Botões */
 .btn-primary, .btn-secondary, .btn-banner {
     transition: all 0.3s ease;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     text-transform: uppercase;
     font-size: 0.875rem;
     letter-spacing: 0.05em;
@@ -1124,4 +1124,173 @@ body:not(.body-over-banner) .logo-text {
 
 .custom-modal .btn-primary {
     width: 100%;
+}
+/* =================================== */
+/* NOVO LAYOUT DO PAINEL DE ADMIN      */
+/* =================================== */
+
+.admin-page .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.admin-page .admin-header p {
+    margin: 0.25rem 0 0 0;
+    color: #666;
+}
+
+.admin-page {
+    padding: 6rem 1.5rem;
+    min-height: 90vh;
+    max-width: 1280px;  /* Define uma largura máxima para o conteúdo */
+    margin-left: auto;   /* Centraliza o contêiner horizontalmente */
+    margin-right: auto;  /* Centraliza o contêiner horizontalmente */
+}
+
+.add-product-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+}
+
+.add-product-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Grade de Cards */
+.admin-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+/* Card Individual */
+.admin-product-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.admin-product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.admin-product-card .card-image-container {
+    width: 100%;
+    height: 200px;
+    background-color: #f5f5f5;
+}
+
+.admin-product-card .admin-product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-product-card .card-content {
+    padding: 1rem;
+    flex-grow: 1; /* Faz o conteúdo ocupar o espaço disponível */
+}
+
+.admin-product-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.admin-product-card .product-description {
+    font-size: 0.875rem;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    min-height: 40px; /* Garante uma altura mínima para a descrição */
+}
+
+.admin-product-card .product-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0a0a0a;
+}
+
+/* Ações no Card */
+.admin-product-card .card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid #e5e5e5;
+}
+
+.admin-product-card .btn-action {
+    background: none;
+    border: none;
+    padding: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: background-color 0.2s ease;
+}
+
+.admin-product-card .btn-action:first-child {
+    border-right: 1px solid #e5e5e5;
+}
+
+.admin-product-card .btn-edit {
+    color: #3b82f6; /* Azul */
+}
+
+.admin-product-card .btn-edit:hover {
+    background-color: #eff6ff;
+}
+
+.admin-product-card .btn-delete {
+    color: #ef4444; /* Vermelho */
+}
+
+.admin-product-card .btn-delete:hover {
+    background-color: #fef2f2;
+}
+
+.admin-product-card .btn-action svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Estilo para o campo de seleção (select) nos formulários */
+.form-group select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background-color: #ffffff;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #0a0a0a;
+    box-shadow: 0 0 0 2px rgba(10, 10, 10, 0.1);
 }

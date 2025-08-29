@@ -208,7 +208,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     if (result.success) {
                         saveCurrentUser(result.user);
-                        window.location.href = 'perfil.php';
+                        // --- VERIFICAÇÃO DE ROLE E REDIRECIONAMENTO ---
+                        if (result.user.role === 'admin') {
+                            window.location.href = 'admin.php'; // Redireciona para o painel de admin
+                        } else {
+                            window.location.href = 'perfil.php'; // Redireciona para o perfil normal
+                        }
                     } else {
                         throw new Error(result.message || "Ocorreu um erro desconhecido.");
                     }
@@ -233,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 successMsg.classList.add("hidden");
 
                 try {
-                    const response = await fetch(`${API_BASE_URL}/auth/register.php`, {
+                    const response = await fetch(`${API_BASE_URL}/register.php`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ name, email, password })

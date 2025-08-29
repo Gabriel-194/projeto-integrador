@@ -5,18 +5,21 @@ require_once('../connection.php');
 // Define que a resposta será no formato JSON
 header('Content-Type: application/json');
 
-// Usando LEFT JOIN para garantir que todos os produtos apareçam,
-// mesmo que uma categoria seja inválida.
+// --- ALTERAÇÃO: Usando LEFT JOIN para incluir o nome da categoria ---
+// A consulta agora busca o nome da categoria (c.nome) e o renomeia para "categoria"
 $sql = "SELECT 
             p.id, 
             p.nome, 
+            p.descricao,
             p.preco, 
             p.imagem_principal, 
             c.nome AS categoria 
         FROM 
             produtos p 
         LEFT JOIN 
-            categorias c ON p.categoria_id = c.id";
+            categorias c ON p.categoria_id = c.id
+        WHERE 
+            p.ativo = TRUE";
 
 $result = $conn->query($sql);
 

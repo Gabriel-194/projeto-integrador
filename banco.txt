@@ -121,3 +121,17 @@ INSERT INTO `produtos` (`nome`, `descricao`, `preco`, `estoque`, `categoria_id`,
 ('SDFM Premium Gray', 'Hoodie cinza premium com acabamento superior e modelagem oversized.', 154.99, 10, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg'),
 ('SDFM Signature Navy', 'Hoodie azul marinho da linha signature com logo bordado e capuz ajustável.', 159.99, 10, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg'),
 ('SDFM Limited Edition', 'Edição limitada com design exclusivo e materiais premium. Numeração única.', 199.99, 5, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg');
+
+-- 5. ADICIONANDO CONTROLE DE ACESSO (ROLE)
+ALTER TABLE clientes
+ADD COLUMN role ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente' AFTER senha_hash;
+
+-- Define o usuário com email 'admin@gmail.com' como administrador
+UPDATE clientes SET role = 'admin' WHERE email = 'admin@gmail.com';
+
+-- 6. ADICIONANDO CONTROLE DE ATIVAÇÃO/EXCLUSÃO LÓGICA PARA PRODUTOS
+ALTER TABLE produtos
+ADD COLUMN ativo BOOLEAN NOT NULL DEFAULT TRUE AFTER preco;
+
+-- Opcional: Se você já tem produtos, certifique-se de que eles estejam ativos por padrão
+UPDATE produtos SET ativo = TRUE WHERE ativo IS NULL;
