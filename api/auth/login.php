@@ -14,8 +14,8 @@ if (empty($username) || empty($senha)) {
     exit;
 }
 
-// --- ALTERAÇÃO: A consulta agora também busca a coluna 'role' ---
-$stmt = $conn->prepare("SELECT id, nome_completo, email, senha_hash, role FROM clientes WHERE nome_completo = ?");
+// --- ALTERAÇÃO: A consulta agora também busca o CPF ---
+$stmt = $conn->prepare("SELECT id, nome_completo, email, senha_hash, role, cpf FROM clientes WHERE nome_completo = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -26,7 +26,7 @@ if ($user && password_verify($senha, $user['senha_hash'])) {
     unset($user['senha_hash']);
     $_SESSION['user'] = $user;
     
-    // O 'role' do usuário agora está incluído na resposta
+    // O 'role' e o 'cpf' do usuário agora estão incluídos na resposta
     echo json_encode(['success' => true, 'message' => 'Login bem-sucedido!', 'user' => $user]);
 } else {
     // Login falhou

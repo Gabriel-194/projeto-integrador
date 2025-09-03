@@ -3,14 +3,12 @@ include('connection.php');
 
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login & Cadastro | Essence Wear</title>
+    <title>Login | Essence Wear</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,12 +46,10 @@ include('connection.php');
                     <button id="search-btn" aria-label="Pesquisar" class="header-element">
                         <i data-lucide="search"></i>
                     </button>
-                     <a href="perfil.php
-                     " id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
+                     <a href="perfil.php" id="user-profile-icon" aria-label="Perfil do usuário" class="header-element">
                         <i data-lucide="user"></i>
                     </a>
-                    <a href="carrinho.php
-                    " aria-label="Carrinho de compras" class="cart-button header-element">
+                    <a href="carrinho.php" aria-label="Carrinho de compras" class="cart-button header-element">
                         <i data-lucide="shopping-cart"></i>
                         <span id="cart-count">0</span>
                     </a>
@@ -71,7 +67,7 @@ include('connection.php');
     </header>
 
     <main>
-        <div class="login-page container">
+        <div class="login-page container" style="justify-content: center;">
             <div class="login-form-container">
                 <h1 class="login-title">Acessar Conta</h1>
                 <form id="login-form" class="auth-form">
@@ -85,27 +81,7 @@ include('connection.php');
                     </div>
                     <p id="login-error" class="auth-error hidden">Usuário ou senha inválidos.</p>
                     <button type="submit" class="btn-primary auth-button">Entrar</button>
-                </form>
-            </div>
-
-            <div class="register-form-container">
-                 <h1 class="login-title">Criar Conta</h1>
-                 <form id="register-form" class="auth-form">
-                    <div class="form-group">
-                        <label for="register-name">Nome Completo</label>
-                        <input type="text" id="register-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-password">Senha</label>
-                        <input type="password" id="register-password" required minlength="6">
-                    </div>
-                    <p id="register-error" class="auth-error hidden">Este email ou nome de usuário já está em uso.</p>
-                    <p id="register-success" class="auth-success hidden">Cadastro realizado com sucesso! Você será redirecionado.</p>
-                    <button type="submit" class="btn-secondary auth-button">Cadastrar</button>
+                    <p class="text-center" style="margin-top: 1rem;">Não tem uma conta? <a href="register.php" style="text-decoration: underline;">Cadastre-se</a>.</p>
                 </form>
             </div>
         </div>

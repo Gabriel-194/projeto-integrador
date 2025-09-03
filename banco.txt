@@ -123,6 +123,10 @@ INSERT INTO `produtos` (`nome`, `descricao`, `preco`, `estoque`, `categoria_id`,
 ('SDFM Limited Edition', 'Edição limitada com design exclusivo e materiais premium. Numeração única.', 199.99, 5, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg');
 
 -- 5. ADICIONANDO CONTROLE DE ACESSO (ROLE)
+
+INSERT INTO cliente (id, nome_completo, email, senha_hash, role, cpf, data_cadastro) 
+VALUES (NULL, 'admin', 'admin@gmail.com', 'admin1234', 'admin', NULL, '2025-08-29 15:50:13');
+
 ALTER TABLE clientes
 ADD COLUMN role ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente' AFTER senha_hash;
 

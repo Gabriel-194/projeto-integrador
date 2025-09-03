@@ -59,13 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const showLoginRequiredModal = () => {
-        // Remove qualquer modal antigo para não duplicar
         const existingModal = document.getElementById('login-required-modal');
-        if (existingModal) {
-            existingModal.remove();
-        }
+        if (existingModal) existingModal.remove();
 
-        // Cria a estrutura do modal
         const modalOverlay = document.createElement('div');
         modalOverlay.id = 'login-required-modal';
         modalOverlay.className = 'custom-modal-overlay open';
@@ -83,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         document.body.appendChild(modalOverlay);
 
-        // Adiciona os eventos para os botões do novo modal
         document.getElementById('modal-go-to-login').addEventListener('click', () => {
             window.location.href = 'login.php';
         });
@@ -91,9 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const closeModal = () => modalOverlay.remove();
         document.getElementById('modal-close-btn').addEventListener('click', closeModal);
         modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                closeModal();
-            }
+            if (e.target === modalOverlay) closeModal();
         });
     };
 
@@ -107,83 +100,79 @@ document.addEventListener("DOMContentLoaded", () => {
             return [];
         }
     };
-
     
-    // --- NOVO: LÓGICA DO BANNER ROTATIVO ---
     const initBanner = () => {
         const slides = document.querySelectorAll(".banner-slide");
-        if (slides.length < 2) return; // Não faz nada se houver menos de 2 slides
+        if (slides.length < 2) return;
         
         let currentSlide = 0;
         const totalSlides = slides.length;
         
         const showSlide = (index) => {
             slides.forEach((slide, i) => {
-                slide.classList.remove("active");
-                if (i === index) {
-                    slide.classList.add("active");
-                }
+                slide.classList.toggle("active", i === index);
             });
         };
         
         setInterval(() => {
             currentSlide = (currentSlide + 1) % totalSlides;
             showSlide(currentSlide);
-        }, 3000); // Muda de slide a cada 5 segundos
+        }, 3000);
     };
 
     const initSearch = () => {
         const searchOverlay = document.getElementById('search-overlay');
+        if (!searchOverlay) return;
+
         const searchInput = document.getElementById('search-input');
         const resultsContainer = document.getElementById('search-results-container');
         const openSearchButtons = document.querySelectorAll('button[aria-label="Pesquisar"]');
         const closeSearchBtn = document.getElementById('search-close-btn');
 
-        if (!searchOverlay) return;
-
         const openSearch = () => searchOverlay.classList.add('open');
         const closeSearch = () => searchOverlay.classList.remove('open');
 
         openSearchButtons.forEach(btn => btn.addEventListener('click', openSearch));
-        closeSearchBtn.addEventListener('click', closeSearch);
+        if(closeSearchBtn) closeSearchBtn.addEventListener('click', closeSearch);
+        
         searchOverlay.addEventListener('click', (e) => {
-            if (e.target === searchOverlay) {
-                closeSearch();
-            }
+            if (e.target === searchOverlay) closeSearch();
         });
         
         let searchTimeout;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            const searchTerm = searchInput.value.trim();
+        if(searchInput){
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                const searchTerm = searchInput.value.trim();
 
-            if (searchTerm.length < 2) {
-                resultsContainer.innerHTML = '<p class="search-no-results">Digite pelo menos 2 caracteres para buscar.</p>';
-                return;
-            }
-
-            resultsContainer.innerHTML = '<p class="search-no-results">Buscando...</p>';
-
-            searchTimeout = setTimeout(async () => {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/search_products.php?term=${encodeURIComponent(searchTerm)}`);
-                    const products = await response.json();
-                    
-                    if (products.length > 0) {
-                         resultsContainer.innerHTML = `<div class="products-grid">${products.map(createProductCard).join('')}</div>`;
-                    } else {
-                         resultsContainer.innerHTML = `<p class="search-no-results">Nenhum produto encontrado para "<strong>${searchTerm}</strong>".</p>`;
-                    }
-                } catch (error) {
-                    console.error('Erro na busca:', error);
-                    resultsContainer.innerHTML = '<p class="search-no-results">Ocorreu um erro ao realizar a busca.</p>';
+                if (searchTerm.length < 2) {
+                    resultsContainer.innerHTML = '<p class="search-no-results">Digite pelo menos 2 caracteres.</p>';
+                    return;
                 }
-            }, 300); // Espera 300ms após o usuário parar de digitar
-        });
+
+                resultsContainer.innerHTML = '<p class="search-no-results">Buscando...</p>';
+
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/search_products.php?term=${encodeURIComponent(searchTerm)}`);
+                        const products = await response.json();
+                        
+                        if (products.length > 0) {
+                             resultsContainer.innerHTML = `<div class="products-grid">${products.map(createProductCard).join('')}</div>`;
+                        } else {
+                             resultsContainer.innerHTML = `<p class="search-no-results">Nenhum produto encontrado para "<strong>${searchTerm}</strong>".</p>`;
+                        }
+                    } catch (error) {
+                        console.error('Erro na busca:', error);
+                        resultsContainer.innerHTML = '<p class="search-no-results">Ocorreu um erro ao buscar.</p>';
+                    }
+                }, 300);
+            });
+        }
     };
-    // --- PÁGINA INICIAL ---
+    
     const initHomePage = async () => {
-        initBanner(); // Adicionando a inicialização do banner aqui
+        initBanner();
         const homeGrid = document.getElementById("home-products-grid");
         if (homeGrid) {
             homeGrid.innerHTML = "<p>Carregando lançamentos...</p>";
@@ -192,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- PÁGINA DA LOJA ---
     const initShopPage = async () => {
         const shopGrid = document.getElementById("shop-products-grid");
         const filterButtons = document.querySelectorAll(".filter-btn");
@@ -203,12 +191,8 @@ document.addEventListener("DOMContentLoaded", () => {
             renderProducts(shopGrid, allProducts);
 
             const filterProducts = (category) => {
-                if (category === "Todos") {
-                    renderProducts(shopGrid, allProducts);
-                } else {
-                    const filtered = allProducts.filter(p => p.categoria === category);
-                    renderProducts(shopGrid, filtered);
-                }
+                const filtered = (category === "Todos") ? allProducts : allProducts.filter(p => p.categoria === category);
+                renderProducts(shopGrid, filtered);
             };
 
             filterButtons.forEach(button => {
@@ -221,9 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
  
-    // --- PÁGINA DE PRODUTO ---
     const initProductPage = async () => {
         const container = document.getElementById("product-detail-container");
+        if (!container) return;
         const params = new URLSearchParams(window.location.search);
         const productId = params.get("id");
 
@@ -256,11 +240,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(result.message);
             }
         } catch(error) {
-            container.innerHTML = `<p>Erro ao carregar produto: ${error.message} <a href="loja.php">Voltar para a loja</a>.</p>`;
+            container.innerHTML = `<p>Erro ao carregar produto: ${error.message} <a href="loja.php">Voltar</a>.</p>`;
         }
     };
 
-    // --- PÁGINA DE LOGIN E CADASTRO ---
     const initLoginPage = () => {
         if (currentUser) {
             window.location.href = 'perfil.php';
@@ -268,108 +251,121 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const loginForm = document.getElementById("login-form");
-        const registerForm = document.getElementById("register-form");
+        if (!loginForm) return;
 
-        if (loginForm) {
-            loginForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+            const errorMsg = document.getElementById("login-error");
+            errorMsg.classList.add("hidden");
 
-                const username = document.getElementById("login-username").value;
-                const password = document.getElementById("login-password").value;
-                const errorMsg = document.getElementById("login-error");
-
-                errorMsg.classList.add("hidden");
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/auth/login.php`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: username, password: password })
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        saveCurrentUser(result.user);
-                        // --- VERIFICAÇÃO DE ROLE E REDIRECIONAMENTO ---
-                        if (result.user.role === 'admin') {
-                            window.location.href = 'admin.php'; // Redireciona para o painel de admin
-                        } else {
-                            window.location.href = 'perfil.php'; // Redireciona para o perfil normal
-                        }
-                    } else {
-                        throw new Error(result.message || "Ocorreu um erro desconhecido.");
-                    }
-
-                } catch (error) {
-                    errorMsg.textContent = error.message;
-                    errorMsg.classList.remove("hidden");
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    saveCurrentUser(result.user);
+                    window.location.href = result.user.role === 'admin' ? 'admin.php' : 'perfil.php';
+                } else {
+                    throw new Error(result.message || "Erro desconhecido.");
                 }
-            });
-        }
-
-        if (registerForm) {
-            registerForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const name = document.getElementById("register-name").value;
-                const email = document.getElementById("register-email").value;
-                const password = document.getElementById("register-password").value;
-                const successMsg = document.getElementById("register-success");
-                const errorMsg = document.getElementById("register-error");
-                
-                errorMsg.classList.add("hidden");
-                successMsg.classList.add("hidden");
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/register.php`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ name, email, password })
-                    });
-                    const result = await response.json();
-
-                    if (result.success) {
-                        successMsg.textContent = result.message + " Faça o login para continuar.";
-                        successMsg.classList.remove("hidden");
-                        registerForm.reset();
-                    } else {
-                        throw new Error(result.message || "Ocorreu um erro desconhecido.");
-                    }
-                } catch(error) {
-                    errorMsg.textContent = error.message;
-                    errorMsg.classList.remove("hidden");
-                }
-            });
-        }
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.classList.remove("hidden");
+            }
+        });
     };
+    
+    // O register.php agora tem o seu próprio script, esta função não é mais necessária aqui
+    // const initRegisterPage = () => { ... }
 
-    // --- PÁGINA DE PERFIL ---
     const initProfilePage = () => {
         const container = document.getElementById("profile-page-container");
+        if (!container) return;
+        
         if (!currentUser) {
             window.location.href = 'login.php';
             return;
         }
 
+        // --- CÓDIGO CORRIGIDO E MAIS SEGURO ---
+        // Ele verifica se 'nome_completo' existe antes de tentar usar o 'split'.
+        const nomeCompleto = currentUser.nome_completo || 'Utilizador';
+        const primeiroNome = nomeCompleto.split(' ')[0];
+
+        const formatPrice = (price) => `R$ ${parseFloat(price).toFixed(2).replace(".", ",")}`;
+
         container.innerHTML = `
-            <h1>Olá, ${currentUser.name.split(' ')[0]}</h1>
-            <div class="profile-info">
-                <p><strong>Nome:</strong> ${currentUser.name}</p>
-                <p><strong>Email:</strong> ${currentUser.email}</p>
+            <h1>Minha Conta</h1>
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <h2>Meus Dados</h2>
+                    <p><strong>Nome:</strong> ${currentUser.nome_completo || 'Não informado'}</p>
+                    <p><strong>Email:</strong> ${currentUser.email || 'Não informado'}</p>
+                    <p><strong>CPF:</strong> ${currentUser.cpf || 'Não informado'}</p>
+                    <button id="logout-btn" class="btn-primary btn-danger">Sair da Conta</button>
+                </div>
+                <div class="order-history">
+                    <h2>Histórico de Pedidos</h2>
+                    <div id="order-history-list" class="order-history-list">
+                        <p>A carregar histórico...</p>
+                    </div>
+                </div>
             </div>
-            <button id="logout-btn" class="btn-primary btn-danger">Sair da Conta</button>`;
-        
+        `;
+
         document.getElementById("logout-btn").addEventListener("click", handleLogout);
+
+        const fetchOrderHistory = async () => {
+            const orderListContainer = document.getElementById("order-history-list");
+            try {
+                const response = await fetch('api/users/get_order_history.php');
+                const result = await response.json();
+
+                if (result.success && result.data.length > 0) {
+                    orderListContainer.innerHTML = result.data.map(order => `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div><strong>Pedido #${order.id}</strong><br><small>${order.data_formatada}</small></div>
+                                <div><strong>Total: ${formatPrice(order.valor_total)}</strong><br><small>Status: ${order.status_pedido}</small></div>
+                            </div>
+                            <div class="order-items">
+                                ${order.itens.map(item => `
+                                    <div class="order-item">
+                                        <img src="${item.imagem_principal}" alt="${item.nome}">
+                                        <div class="order-item-details">
+                                            <p>${item.nome}</p>
+                                            <span>${item.quantidade} x ${formatPrice(item.preco_unitario)}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                } else if (result.success && result.data.length === 0) {
+                    orderListContainer.innerHTML = '<p>Você ainda não fez nenhum pedido.</p>';
+                } else {
+                    throw new Error(result.message || "Não foi possível carregar o histórico.");
+                }
+            } catch (error) {
+                orderListContainer.innerHTML = `<p style="color: red;">${error.message}</p>`;
+            }
+        };
+
+        fetchOrderHistory();
     };
 
 
-    // --- PÁGINA DO CARRINHO ---
     const renderCartPage = () => {
         const container = document.getElementById("carrinho-container");
         if (!container) return;
 
         if (cart.length === 0) {
-            container.innerHTML = `<div class="cart-empty"><h2>O seu carrinho está vazio.</h2><a href="loja.php" class="btn-primary">Continuar a comprar</a></div>`;
+            container.innerHTML = `<div class="cart-empty"><h2>Seu carrinho está vazio.</h2><a href="loja.php" class="btn-primary">Continuar comprando</a></div>`;
             return;
         }
 
@@ -382,14 +378,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="cart-item-actions">
                     <p>Qtd: ${item.quantity}</p>
-                    <button class="remove-cart-item-btn" data-index="${index}" style="background:none; border:none; color:red; text-decoration:underline; cursor:pointer;">Remover</button>
+                    <button class="remove-cart-item-btn" data-index="${index}" style="background:none;border:none;color:red;text-decoration:underline;cursor:pointer;">Remover</button>
                 </div>
             </div>`).join("");
         
         const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
         
         container.innerHTML = `
-            <h2>O seu Carrinho</h2>
+            <h2>Seu Carrinho</h2>
             <div class="cart-items-list">${cartItemsHTML}</div>
             <div class="cart-summary">
                 <h3>Total: ${formatPrice(totalPrice)}</h3>
@@ -397,109 +393,102 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>`;
     };
 
-    // =================================================================
-    // --- INICIALIZAÇÃO E EVENT LISTENERS GLOBAIS ---
-    // =================================================================
-    // --- PÁGINA DE CHECKOUT ---
-const initCheckoutPage = () => {
-    const container = document.getElementById('checkout-container');
-    if (!container) return;
+    const initCheckoutPage = () => {
+        const container = document.getElementById('checkout-container');
+        if (!container) return;
+        if (!currentUser) {
+            window.location.href = 'login.php';
+            return;
+        }
+        if (cart.length === 0) {
+            container.innerHTML = '<p>Seu carrinho está vazio. Redirecionando...</p>';
+            setTimeout(() => window.location.href = 'loja.php', 2000);
+            return;
+        }
 
-    if (!currentUser) {
-        window.location.href = 'login.php';
-        return;
-    }
-    if (cart.length === 0) {
-        container.innerHTML = '<p>Seu carrinho está vazio. Redirecionando para a loja...</p>';
-        setTimeout(() => window.location.href = 'loja.php', 2000);
-        return;
-    }
-
-    const renderCheckout = (addresses) => {
-        const cartSummaryHTML = cart.map(item => `
-            <div class="summary-item">
-                <img src="${item.image}" alt="${item.name}">
-                <div class="summary-item-details">
-                    <p>${item.name}</p>
-                    <span>${item.quantity} x ${formatPrice(item.price)}</span>
-                </div>
-            </div>
-        `).join('');
-
-        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-        const addressesHTML = addresses.length > 0 ? addresses.map((addr, index) => `
-            <label class="address-option">
-                <input type="radio" name="address" value="${addr.id}" ${index === 0 ? 'checked' : ''}>
-                <div>
-                    <strong>${addr.logradouro}, ${addr.numero}</strong><br>
-                    ${addr.bairro}, ${addr.cidade} - ${addr.estado}<br>
-                    CEP: ${addr.cep}
-                </div>
-            </label>
-        `).join('') : '<p>Nenhum endereço cadastrado. <a href="perfil.php">Adicionar endereço</a></p>';
-
-        container.innerHTML = `
-            <div class="checkout-layout">
-                <div class="checkout-details">
-                    <h3>Endereço de Entrega</h3>
-                    <div class="address-selection">${addressesHTML}</div>
-                </div>
-                <div class="checkout-summary">
-                    <h3>Resumo do Pedido</h3>
-                    <div class="summary-items">${cartSummaryHTML}</div>
-                    <div class="summary-total">
-                        <strong>Total:</strong>
-                        <strong>${formatPrice(total)}</strong>
+        const renderCheckout = (addresses) => {
+            const cartSummaryHTML = cart.map(item => `
+                <div class="summary-item">
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="summary-item-details">
+                        <p>${item.name}</p>
+                        <span>${item.quantity} x ${formatPrice(item.price)}</span>
                     </div>
-                    <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Finalizar Pedido</button>
-                </div>
-            </div>
-        `;
-    };
+                </div>`).join('');
 
-    // Busca os endereços e renderiza a página
-    fetch(`${API_BASE_URL}/users/get_addresses.php`)
-        .then(res => res.json())
-        .then(result => {
-            if (result.success) {
-                renderCheckout(result.data);
+            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-                const placeOrderBtn = document.getElementById('place-order-btn');
-                placeOrderBtn.addEventListener('click', async () => {
-                    const selectedAddress = document.querySelector('input[name="address"]:checked');
-                    if (!selectedAddress) {
-                        alert('Por favor, selecione um endereço de entrega.');
-                        return;
+            const addressesHTML = addresses.length > 0 ? addresses.map((addr, index) => `
+                <label class="address-option">
+                    <input type="radio" name="address" value="${addr.id}" ${index === 0 ? 'checked' : ''}>
+                    <div>
+                        <strong>${addr.logradouro}, ${addr.numero}</strong><br>
+                        ${addr.bairro}, ${addr.cidade} - ${addr.estado}<br>
+                        CEP: ${addr.cep}
+                    </div>
+                </label>`).join('') : '<p>Nenhum endereço cadastrado. <a href="perfil.php">Adicionar</a></p>';
+
+            container.innerHTML = `
+                <div class="checkout-layout">
+                    <div class="checkout-details">
+                        <h3>Endereço de Entrega</h3>
+                        <div class="address-selection">${addressesHTML}</div>
+                    </div>
+                    <div class="checkout-summary">
+                        <h3>Resumo do Pedido</h3>
+                        <div class="summary-items">${cartSummaryHTML}</div>
+                        <div class="summary-total">
+                            <strong>Total:</strong>
+                            <strong>${formatPrice(total)}</strong>
+                        </div>
+                        <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Finalizar Pedido</button>
+                    </div>
+                </div>`;
+        };
+
+        fetch(`${API_BASE_URL}/users/get_addresses.php`)
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    renderCheckout(result.data);
+                    const placeOrderBtn = document.getElementById('place-order-btn');
+                    if (placeOrderBtn) {
+                        placeOrderBtn.addEventListener('click', async () => {
+                            const selectedAddress = document.querySelector('input[name="address"]:checked');
+                            if (!selectedAddress) {
+                                alert('Selecione um endereço.');
+                                return;
+                            }
+
+                            placeOrderBtn.disabled = true;
+                            placeOrderBtn.textContent = 'Processando...';
+
+                            const response = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    address_id: selectedAddress.value,
+                                    cart: cart
+                                })
+                            });
+                            const orderResult = await response.json();
+
+                            if (orderResult.success) {
+                                cart = [];
+                                saveCart();
+                                updateCartCount();
+                                window.location.href = 'confirmation.php';
+                            } else {
+                                alert('Erro: ' + orderResult.message);
+                                placeOrderBtn.disabled = false;
+                                placeOrderBtn.textContent = 'Finalizar Pedido';
+                            }
+                        });
                     }
-
-                    placeOrderBtn.disabled = true;
-                    placeOrderBtn.textContent = 'Processando...';
-
-                    const response = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            address_id: selectedAddress.value,
-                            cart: cart
-                        })
-                    });
-                    const orderResult = await response.json();
-
-                    if (orderResult.success) {
-                        cart = []; // Limpa o carrinho
-                        saveCart();
-                        updateCartCount();
-                        window.location.href = 'order_confirmation.php';
-                    } else {
-                        alert('Erro ao finalizar o pedido: ' + orderResult.message);
-                        placeOrderBtn.disabled = false;
-                        placeOrderBtn.textContent = 'Finalizar Pedido';
-                    }
-                });
-            }
-        });
-    };
+                }
+            });
+        };
+        
     const init = () => {
         updateUserIcon();
         updateCartCount();
@@ -510,6 +499,7 @@ const initCheckoutPage = () => {
         if (document.getElementById("shop-products-grid")) initShopPage();
         if (document.getElementById("product-detail-container")) initProductPage();
         if (document.getElementById("login-form")) initLoginPage();
+        // A função initRegisterPage foi removida daqui porque o register.php agora tem o seu próprio script.
         if (document.getElementById("profile-page-container")) initProfilePage();
         if (document.getElementById("carrinho-container")) renderCartPage();
         if (document.getElementById("checkout-container")) initCheckoutPage();
@@ -519,15 +509,11 @@ const initCheckoutPage = () => {
             
             if (target.matches('.add-cart-btn')) {
                 e.preventDefault();
-
-                // --- VERIFICAÇÃO DE LOGIN (NOVO) ---
                 if (!currentUser) {
                     showLoginRequiredModal();
-                    return; // Para a execução aqui se o usuário não estiver logado
+                    return; 
                 }
-                // --- FIM DA VERIFICAÇÃO ---
-
-                // O código abaixo só será executado se o usuário estiver logado
+                
                 const productId = target.dataset.productId;
                 const existingItem = cart.find(item => item.productId === productId);
 
@@ -535,7 +521,7 @@ const initCheckoutPage = () => {
                     existingItem.quantity++;
                 } else {
                     cart.push({
-                        productId: productId,
+                        productId,
                         name: target.dataset.productName,
                         price: parseFloat(target.dataset.productPrice),
                         image: target.dataset.productImage,
