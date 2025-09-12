@@ -21,6 +21,35 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- FUNÇÕES UTILITÁRIAS E GLOBAIS ---
     // =================================================================
 
+// --- CÓDIGO DO HEADER DINÂMICO ---
+const header = document.getElementById("header");
+    const banner = document.getElementById("banner-container");
+    const body = document.body; 
+
+    if (header && banner) {
+        const bannerHeight = banner.offsetHeight;
+        const headerHeight = header.offsetHeight;
+
+        function updateHeader() {
+            // A condição para o header ficar escuro é:
+            // 1. O usuário PRECISA ter começado a rolar a página (scrollY > 10).
+            // 2. A rolagem ainda NÃO PODE ter ultrapassado a altura do banner.
+            if (window.scrollY > 10 && window.scrollY < (bannerHeight - headerHeight)) {
+                // Adiciona as classes para o estado "sobre o banner"
+                header.classList.add("header-over-banner");
+                body.classList.add("body-over-banner");
+            } else {
+                // Em todos os outros casos (no topo ou após o banner), remove as classes.
+                header.classList.remove("header-over-banner");
+                body.classList.remove("body-over-banner");
+            }
+        }
+
+        // Roda a função uma vez ao carregar e depois a cada scroll
+        updateHeader(); 
+        window.addEventListener("scroll", updateHeader);
+    }
+
     const formatPrice = (price) => `R$ ${parseFloat(price).toFixed(2).replace(".", ",")}`;
 
     const updateCartCount = () => {
@@ -488,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         };
-        
+   
     const init = () => {
         updateUserIcon();
         updateCartCount();
@@ -499,7 +528,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.getElementById("shop-products-grid")) initShopPage();
         if (document.getElementById("product-detail-container")) initProductPage();
         if (document.getElementById("login-form")) initLoginPage();
-        // A função initRegisterPage foi removida daqui porque o register.php agora tem o seu próprio script.
         if (document.getElementById("profile-page-container")) initProfilePage();
         if (document.getElementById("carrinho-container")) renderCartPage();
         if (document.getElementById("checkout-container")) initCheckoutPage();

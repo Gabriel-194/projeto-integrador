@@ -25,7 +25,7 @@ include('connection.php');
     <div class="logo-text">ESSENCE</div>
     </div>
 
-    <header id="header" class="header">
+  <header id="header" class="header">
     <div class="container">
     <div class="header-container">
     <div class="mobile-menu-toggle">

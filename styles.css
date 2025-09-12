@@ -78,39 +78,24 @@ img {
     padding-right: 1.5rem;
 }
 
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background-color: white; /* Corrigido */
-  color: black;            /* Corrigido */
-  transition: background-color 0.3s ease, color 0.3s ease;
-  z-index: 1000;
-}
-
-header a, header i {
-  color: black; /* Garante que links e ícones fiquem pretos */
-}
-
-header.scrolled {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 /* =================================== */
 /* HEADER - CÓDIGO ATUALIZADO          */
 /* =================================== */
 
 /* ESTADO PADRÃO: Fundo branco com blur, texto preto */
+/* =================================== */
+/* HEADER - CÓDIGO CORRIGIDO           */
+/* =================================== */
+
+/* ESTADO PADRÃO (QUANDO O UTILIZADOR FAZ SCROLL): Fundo branco, texto preto */
 .header {
     position: sticky;
     top: 0;
     z-index: 40;
-    background-color: rgb(255, 255, 255); /* Fundo branco translúcido por padrão */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* Borda escura */
-    /* --- MODIFICADO --- Transição mais específica */
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .header-container {
@@ -123,25 +108,17 @@ header.scrolled {
 
 /* O texto padrão dos elementos do header é preto */
 .header-element {
-    transition: color 0.3s ease; /* Transição para a cor do texto/ícones */
-    color: #0a0a0a;
+    transition: color 0.4s ease;
+    color: #0a0a0a; /* Texto preto por defeito */
     background: none;
     border: none;
 }
 
-body:not(.body-over-banner) .header-element {
-    color: #0a0a0a;
-}
-
-/* --- MODIFICADO --- Efeito hover padrão mais sutil */
-.header-element:hover {
-    color: #000000;
-}
-
 .header-nav {
-    display: none; /* Oculto em mobile por padrão */
+    display: none;
     align-items: center;
 }
+
 .header-nav a {
     text-transform: uppercase;
     font-size: 0.875rem;
@@ -159,61 +136,58 @@ body:not(.body-over-banner) .header-element {
     position: relative;
 }
 
-/* Contador do carrinho padrão (fundo preto, texto branco) */
 #cart-count {
     position: absolute;
     top: -0.5rem;
     right: -0.5rem;
     width: 1rem;
     height: 1rem;
-    background-color: #0a0a0a;
-    color: #ffffff;
+    background-color: #0a0a0a; /* Fundo preto por defeito */
+    color: #ffffff; /* Texto branco por defeito */
     font-size: 0.75rem;
     border-radius: 9999px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    /* --- ADICIONADO --- Transição para o contador */
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* Dimensionamento para Ícones Lucide */
-.header .mobile-menu-toggle svg {
-    width: 24px;
-    height: 24px;
-}
-
+.header .mobile-menu-toggle svg,
 .header .header-actions svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
 }
 
-
-/* --- CÓDIGO ADICIONADO / SUBSTITUÍDO --- */
-/* ESTADO ESPECIAL: Sobre o banner do Index (Controlado via JS com a classe no BODY) */
-
-body.body-over-banner .header {
-    background-color: transparent !important; /* Fundo totalmente transparente */
-    border-bottom-color: rgba(255, 255, 255, 0.2); /* Borda clara */
-    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10); /* Sombra leve para contraste */
+/* ESTADO SOBRE O BANNER (INICIAL): Fundo transparente, texto branco */
+/* Esta classe é adicionada pelo JavaScript e SOBRESCREVE os estilos padrão acima */
+.header-over-banner {
+    background-color: rgba(0, 0, 0, 0.493); /* Fundo escuro translúcido */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Borda clara */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
-body.body-over-banner .header-element {
-    color: #ffffff !important;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.18); /* Sombra para melhor leitura */
-}
-body.body-over-banner .header-element:hover {
-    color: #e5e5e5 !important;
+/* Quando está sobre o banner, o texto e ícones ficam brancos */
+.header-over-banner .header-element {
+    color: #ffffff !important; /* Texto branco sobre o banner */
 }
 
-/* O texto e ícones ficam brancos */
-
-/* O contador do carrinho inverte as cores para ser legível */
-body.body-over-banner #cart-count {
-    background-color: #ffffff;
-    color: #0a0a0a;
+/* Quando está sobre o banner, o contador do carrinho inverte as cores */
+.header-over-banner #cart-count {
+    background-color: #ffffff; /* Contador com fundo branco */
+    color: #0a0a0a;           /* e texto preto */
 }
+
+.logo-text {
+    color: #0a0a0a; /* Logo preto por defeito */
+    transition: color 0.4s ease;
+}
+
+body.body-over-banner .logo-text {
+    color: #ffffff;
+}
+
 /* --- FIM DO CÓDIGO ADICIONADO --- */
 
 
