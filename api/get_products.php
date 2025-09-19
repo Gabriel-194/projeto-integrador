@@ -1,32 +1,38 @@
 <?php
-// Inclui a conexão com o banco de dados
+// api/get_products.php
 require_once('../connection.php');
-
-// Define que a resposta será no formato JSON
 header('Content-Type: application/json');
 
-// Usando LEFT JOIN para incluir o nome da categoria na resposta
+// Verifica se o admin quer ver TODOS os produtos (ativos e inativos)
+$showAll = isset($_GET['show_all']) && $_GET['show_all'] === 'true';
+
+// Monta a consulta SQL base
 $sql = "SELECT
             p.id,
             p.nome,
             p.descricao,
             p.preco,
             p.imagem_principal,
+            p.ativo, -- Importante: precisamos saber o status do produto
             c.nome AS categoria
         FROM
             produtos p
         LEFT JOIN
-            categorias c ON p.categoria_id = c.id
-        WHERE
-            p.ativo = TRUE";
+            categorias c ON p.categoria_id = c.id";
+
+// Se não for para mostrar todos, adiciona a condição para pegar apenas os ativos
+if (!$showAll) {
+    $sql .= " WHERE p.ativo = TRUE";
+}
+
+$sql .= " ORDER BY p.id DESC";
 
 $result = $conn->query($sql);
 
 $products = [];
-if ($result && $result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $products[] = $row;
-    }
+if ($result) {
+    // Usamos fetch_all para uma sintaxe mais limpa
+    $products = $result->fetch_all(MYSQLI_ASSOC);
 }
 
 echo json_encode($products);

@@ -1,8 +1,6 @@
 <?php
 include('connection.php');
-
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -69,6 +67,26 @@ include('connection.php');
     <main>
         <div id="product-detail-container" class="product-detail-page container">
             </div>
+
+        <section id="related-products-section" class="section bg-secondary hidden">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Você também pode gostar</h2>
+                </div>
+                <div class="custom-carousel-container">
+                    <div class="custom-carousel-viewport">
+                        <div id="related-products-wrapper" class="custom-carousel-wrapper">
+                            </div>
+                    </div>
+                    <button id="carousel-prev-btn" class="carousel-nav-btn carousel-prev-btn" aria-label="Anterior">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <button id="carousel-next-btn" class="carousel-nav-btn carousel-next-btn" aria-label="Próximo">
+                        <i data-lucide="chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -76,6 +94,7 @@ include('connection.php');
             <p>&copy; 2025 ESSENCE WEAR. TODOS OS DIREITOS RESERVADOS.</p>
         </div>
     </footer>
+
     <div id="search-overlay" class="search-overlay">
         <div class="search-modal">
             <div class="search-header">
@@ -92,6 +111,7 @@ include('connection.php');
                 </div>
         </div>
     </div>
+    
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // --- CONFIGURAÇÕES GLOBAIS ---
-    const API_BASE_URL = 'api'; 
+    const API_BASE_URL = 'api';
 
     // --- GERENCIAMENTO DE ESTADO NO NAVEGADOR ---
     let cart = JSON.parse(localStorage.getItem("essenceCart")) || [];
@@ -16,37 +16,40 @@ document.addEventListener("DOMContentLoaded", () => {
         currentUser = null;
     };
 
-
     // =================================================================
     // --- FUNÇÕES UTILITÁRIAS E GLOBAIS ---
     // =================================================================
+    const initMobileMenu = () => {
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-// --- CÓDIGO DO HEADER DINÂMICO ---
-const header = document.getElementById("header");
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    };
+
+    // --- CÓDIGO DO HEADER DINÂMICO ---
+    const header = document.getElementById("header");
     const banner = document.getElementById("banner-container");
-    const body = document.body; 
+    const body = document.body;
 
     if (header && banner) {
         const bannerHeight = banner.offsetHeight;
         const headerHeight = header.offsetHeight;
 
         function updateHeader() {
-            // A condição para o header ficar escuro é:
-            // 1. O usuário PRECISA ter começado a rolar a página (scrollY > 10).
-            // 2. A rolagem ainda NÃO PODE ter ultrapassado a altura do banner.
             if (window.scrollY > 10 && window.scrollY < (bannerHeight - headerHeight)) {
-                // Adiciona as classes para o estado "sobre o banner"
                 header.classList.add("header-over-banner");
                 body.classList.add("body-over-banner");
             } else {
-                // Em todos os outros casos (no topo ou após o banner), remove as classes.
                 header.classList.remove("header-over-banner");
                 body.classList.remove("body-over-banner");
             }
         }
 
-        // Roda a função uma vez ao carregar e depois a cada scroll
-        updateHeader(); 
+        updateHeader();
         window.addEventListener("scroll", updateHeader);
     }
 
@@ -59,7 +62,13 @@ const header = document.getElementById("header");
 
     const updateUserIcon = () => {
         const el = document.getElementById("user-profile-icon");
-        if (el) el.href = currentUser ? 'perfil.php' : 'login.php';
+        if (el) {
+            if (currentUser) {
+                el.href = currentUser.role === 'admin' ? 'admin.php' : 'perfil.php';
+            } else {
+                el.href = 'login.php';
+            }
+        }
     };
 
     const createProductCard = (product) => `
@@ -237,6 +246,7 @@ const header = document.getElementById("header");
     const initProductPage = async () => {
         const container = document.getElementById("product-detail-container");
         if (!container) return;
+
         const params = new URLSearchParams(window.location.search);
         const productId = params.get("id");
 
@@ -253,29 +263,120 @@ const header = document.getElementById("header");
 
             if (result.success) {
                 const product = result.data;
+                
+                const sizesHTML = (product.tamanhos && product.tamanhos.length > 0) ? `
+                    <div class="size-selection">
+                        <h3>Tamanho:</h3>
+                        <div class="size-buttons">
+                            ${product.tamanhos.map(size => `<button class="size-btn">${size}</button>`).join('')}
+                        </div>
+                    </div>` : '';
+
                 container.innerHTML = `
                     <div class="product-detail-content">
-                        <div class="product-images"><img id="main-product-image" src="${product.imagem_principal}" alt="${product.nome}"></div>
+                        <div class="product-images"><img src="${product.imagem_principal}" alt="${product.nome}"></div>
                         <div class="product-info">
                             <h1>${product.nome}</h1>
                             <p class="price">${formatPrice(product.preco)}</p>
                             <p class="description">${product.descricao || 'Descrição não disponível.'}</p>
+                            ${sizesHTML}
                             <div class="add-to-cart-section">
-                                <button class="add-cart-btn btn-primary" data-product-id="${product.id}" data-product-name="${product.nome}" data-product-price="${product.preco}" data-product-image="${product.imagem_principal}">Adicionar ao Carrinho</button>
+                                <p id="size-error-message" class="hidden" style="color: red; margin-bottom: 10px;">Por favor, selecione um tamanho.</p>
+                                <button class="add-cart-btn btn-primary" ${sizesHTML ? 'disabled' : ''}>Adicionar ao Carrinho</button>
                             </div>
                         </div>
                     </div>`;
+                
+                // Lógica para seleção de tamanho e adicionar ao carrinho
+                const sizeButtons = container.querySelectorAll('.size-btn');
+                const addToCartBtn = container.querySelector('.add-cart-btn');
+                const sizeErrorMessage = container.querySelector('#size-error-message');
+
+                sizeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        sizeButtons.forEach(btn => btn.classList.remove('selected'));
+                        button.classList.add('selected');
+                        addToCartBtn.disabled = false;
+                        sizeErrorMessage.classList.add('hidden');
+                    });
+                });
+
+                addToCartBtn.addEventListener('click', () => {
+                    if (!currentUser) {
+                        showLoginRequiredModal();
+                        return;
+                    }
+                    const selectedSizeButton = container.querySelector('.size-btn.selected');
+                    if (sizeButtons.length > 0 && !selectedSizeButton) {
+                        sizeErrorMessage.classList.remove('hidden');
+                        return;
+                    }
+                    const selectedSize = selectedSizeButton ? selectedSizeButton.textContent : null;
+                    const itemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
+                    const existingItem = cart.find(item => item.id === itemId);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cart.push({
+                            id: itemId,
+                            productId: product.id,
+                            name: product.nome,
+                            price: parseFloat(product.preco),
+                            image: product.imagem_principal,
+                            size: selectedSize,
+                            quantity: 1
+                        });
+                    }
+                    saveCart();
+                    updateCartCount();
+                    addToCartBtn.textContent = "Adicionado ✓";
+                    addToCartBtn.classList.add("btn-success");
+                    setTimeout(() => {
+                        addToCartBtn.textContent = "Adicionar ao Carrinho";
+                        addToCartBtn.classList.remove("btn-success");
+                    }, 2000);
+                });
+
+                // --- LÓGICA DO CARROSSEL DE PRODUTOS RELACIONADOS ---
+                if (product.categoria_id) {
+                    const relatedSection = document.getElementById('related-products-section');
+                    const relatedWrapper = document.getElementById('related-products-wrapper');
+
+                    const relatedResponse = await fetch(`${API_BASE_URL}/products/get_related_products.php?categoria_id=${product.categoria_id}&produto_id=${product.id}`);
+                    const relatedProducts = await relatedResponse.json();
+
+                    if (relatedProducts.length > 0 && relatedWrapper) {
+                        relatedWrapper.innerHTML = relatedProducts.map(p => `<div class="swiper-slide">${createProductCard(p)}</div>`).join('');
+                        relatedSection.classList.remove('hidden');
+
+                        new Swiper('.related-products-swiper', {
+                            loop: relatedProducts.length > 4,
+                            slidesPerView: 1,
+                            spaceBetween: 30,
+                            navigation: {
+                                nextEl: '.swiper-button-next',
+                                prevEl: '.swiper-button-prev',
+                            },
+                            breakpoints: {
+                                640: { slidesPerView: 2 },
+                                768: { slidesPerView: 3 },
+                                1024: { slidesPerView: 4 },
+                            },
+                        });
+                    }
+                }
+
             } else {
                 throw new Error(result.message);
             }
-        } catch(error) {
-            container.innerHTML = `<p>Erro ao carregar produto: ${error.message} <a href="loja.php">Voltar</a>.</p>`;
+        } catch (error) {
+            container.innerHTML = `<p>Erro ao carregar produto: ${error.message}. <a href="loja.php">Voltar</a>.</p>`;
         }
     };
 
     const initLoginPage = () => {
         if (currentUser) {
-            window.location.href = 'perfil.php';
+            window.location.href = currentUser.role === 'admin' ? 'admin.php' : 'perfil.php';
             return;
         }
 
@@ -309,10 +410,7 @@ const header = document.getElementById("header");
         });
     };
     
-    // O register.php agora tem o seu próprio script, esta função não é mais necessária aqui
-    // const initRegisterPage = () => { ... }
-
-    const initProfilePage = () => {
+    const initProfilePage = async () => {
         const container = document.getElementById("profile-page-container");
         if (!container) return;
         
@@ -320,13 +418,6 @@ const header = document.getElementById("header");
             window.location.href = 'login.php';
             return;
         }
-
-        // --- CÓDIGO CORRIGIDO E MAIS SEGURO ---
-        // Ele verifica se 'nome_completo' existe antes de tentar usar o 'split'.
-        const nomeCompleto = currentUser.nome_completo || 'Utilizador';
-        const primeiroNome = nomeCompleto.split(' ')[0];
-
-        const formatPrice = (price) => `R$ ${parseFloat(price).toFixed(2).replace(".", ",")}`;
 
         container.innerHTML = `
             <h1>Minha Conta</h1>
@@ -340,54 +431,42 @@ const header = document.getElementById("header");
                 </div>
                 <div class="order-history">
                     <h2>Histórico de Pedidos</h2>
-                    <div id="order-history-list" class="order-history-list">
-                        <p>A carregar histórico...</p>
-                    </div>
+                    <div id="order-history-list"><p>A carregar histórico...</p></div>
                 </div>
-            </div>
-        `;
+            </div>`;
 
         document.getElementById("logout-btn").addEventListener("click", handleLogout);
 
-        const fetchOrderHistory = async () => {
-            const orderListContainer = document.getElementById("order-history-list");
-            try {
-                const response = await fetch('api/users/get_order_history.php');
-                const result = await response.json();
+        const orderListContainer = document.getElementById("order-history-list");
+        try {
+            const response = await fetch('api/users/get_order_history.php');
+            const result = await response.json();
 
-                if (result.success && result.data.length > 0) {
-                    orderListContainer.innerHTML = result.data.map(order => `
-                        <div class="order-card">
-                            <div class="order-header">
-                                <div><strong>Pedido #${order.id}</strong><br><small>${order.data_formatada}</small></div>
-                                <div><strong>Total: ${formatPrice(order.valor_total)}</strong><br><small>Status: ${order.status_pedido}</small></div>
-                            </div>
-                            <div class="order-items">
-                                ${order.itens.map(item => `
-                                    <div class="order-item">
-                                        <img src="${item.imagem_principal}" alt="${item.nome}">
-                                        <div class="order-item-details">
-                                            <p>${item.nome}</p>
-                                            <span>${item.quantidade} x ${formatPrice(item.preco_unitario)}</span>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
+            if (result.success && result.data.length > 0) {
+                orderListContainer.innerHTML = result.data.map(order => `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div><strong>Pedido #${order.id}</strong><br><small>${order.data_formatada}</small></div>
+                            <div><strong>Total: ${formatPrice(order.valor_total)}</strong><br><small>Status: ${order.status_pedido}</small></div>
                         </div>
-                    `).join('');
-                } else if (result.success && result.data.length === 0) {
-                    orderListContainer.innerHTML = '<p>Você ainda não fez nenhum pedido.</p>';
-                } else {
-                    throw new Error(result.message || "Não foi possível carregar o histórico.");
-                }
-            } catch (error) {
-                orderListContainer.innerHTML = `<p style="color: red;">${error.message}</p>`;
+                        <div class="order-items">
+                            ${order.itens.map(item => `
+                                <div class="order-item">
+                                    <img src="${item.imagem_principal}" alt="${item.nome}">
+                                    <div class="order-item-details">
+                                        <p>${item.nome}</p>
+                                        <span>${item.quantidade} x ${formatPrice(item.preco_unitario)}</span>
+                                    </div>
+                                </div>`).join('')}
+                        </div>
+                    </div>`).join('');
+            } else {
+                orderListContainer.innerHTML = '<p>Você ainda não fez nenhum pedido.</p>';
             }
-        };
-
-        fetchOrderHistory();
+        } catch (error) {
+            orderListContainer.innerHTML = `<p style="color: red;">Não foi possível carregar o histórico.</p>`;
+        }
     };
-
 
     const renderCartPage = () => {
         const container = document.getElementById("carrinho-container");
@@ -398,101 +477,104 @@ const header = document.getElementById("header");
             return;
         }
 
-        const cartItemsHTML = cart.map((item, index) => `
-            <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}">
-                <div class="cart-item-info">
-                    <h3>${item.name}</h3>
-                    <p>Preço: ${formatPrice(item.price)}</p>
-                </div>
-                <div class="cart-item-actions">
-                    <p>Qtd: ${item.quantity}</p>
-                    <button class="remove-cart-item-btn" data-index="${index}" style="background:none;border:none;color:red;text-decoration:underline;cursor:pointer;">Remover</button>
-                </div>
-            </div>`).join("");
-        
-        const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-        
         container.innerHTML = `
             <h2>Seu Carrinho</h2>
-            <div class="cart-items-list">${cartItemsHTML}</div>
+            <div class="cart-items-list">${cart.map((item, index) => `
+                <div class="cart-item">
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="cart-item-info">
+                        <h3>${item.name}</h3>
+                        ${item.size ? `<p>Tamanho: <strong>${item.size}</strong></p>` : ''}
+                        <p>Preço: ${formatPrice(item.price)}</p>
+                    </div>
+                    <div class="cart-item-actions">
+                        <p>Qtd: ${item.quantity}</p>
+                        <button class="remove-cart-item-btn" data-index="${index}" style="background:none;border:none;color:red;text-decoration:underline;cursor:pointer;">Remover</button>
+                    </div>
+                </div>`).join("")}
+            </div>
             <div class="cart-summary">
-                <h3>Total: ${formatPrice(totalPrice)}</h3>
+                <h3>Total: ${formatPrice(cart.reduce((total, item) => total + item.price * item.quantity, 0))}</h3>
                 <a href="checkout.php" class="btn-primary">Finalizar Compra</a>
             </div>`;
+            
+        container.querySelectorAll('.remove-cart-item-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                cart.splice(button.dataset.index, 1);
+                saveCart();
+                updateCartCount();
+                renderCartPage();
+            });
+        });
     };
 
-    const initCheckoutPage = () => {
+    const initCheckoutPage = async () => {
         const container = document.getElementById('checkout-container');
         if (!container) return;
-        if (!currentUser) {
-            window.location.href = 'login.php';
-            return;
-        }
+        if (!currentUser) { window.location.href = 'login.php'; return; }
         if (cart.length === 0) {
             container.innerHTML = '<p>Seu carrinho está vazio. Redirecionando...</p>';
             setTimeout(() => window.location.href = 'loja.php', 2000);
             return;
         }
 
-        const renderCheckout = (addresses) => {
-            const cartSummaryHTML = cart.map(item => `
-                <div class="summary-item">
-                    <img src="${item.image}" alt="${item.name}">
-                    <div class="summary-item-details">
-                        <p>${item.name}</p>
-                        <span>${item.quantity} x ${formatPrice(item.price)}</span>
-                    </div>
-                </div>`).join('');
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/get_addresses.php`);
+            const result = await response.json();
 
-            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            if (result.success) {
+                const addresses = result.data;
+                const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-            const addressesHTML = addresses.length > 0 ? addresses.map((addr, index) => `
-                <label class="address-option">
-                    <input type="radio" name="address" value="${addr.id}" ${index === 0 ? 'checked' : ''}>
-                    <div>
-                        <strong>${addr.logradouro}, ${addr.numero}</strong><br>
-                        ${addr.bairro}, ${addr.cidade} - ${addr.estado}<br>
-                        CEP: ${addr.cep}
-                    </div>
-                </label>`).join('') : '<p>Nenhum endereço cadastrado. <a href="perfil.php">Adicionar</a></p>';
-
-            container.innerHTML = `
-                <div class="checkout-layout">
-                    <div class="checkout-details">
-                        <h3>Endereço de Entrega</h3>
-                        <div class="address-selection">${addressesHTML}</div>
-                    </div>
-                    <div class="checkout-summary">
-                        <h3>Resumo do Pedido</h3>
-                        <div class="summary-items">${cartSummaryHTML}</div>
-                        <div class="summary-total">
-                            <strong>Total:</strong>
-                            <strong>${formatPrice(total)}</strong>
+                const addressesHTML = addresses.length > 0 ? addresses.map((addr, index) => `
+                    <label class="address-option">
+                        <input type="radio" name="address" value="${addr.id}" ${index === 0 ? 'checked' : ''}>
+                        <div>
+                            <strong>${addr.logradouro}, ${addr.numero}</strong><br>
+                            ${addr.bairro}, ${addr.cidade} - ${addr.estado}<br>
+                            CEP: ${addr.cep}
                         </div>
-                        <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Finalizar Pedido</button>
-                    </div>
-                </div>`;
-        };
+                    </label>`).join('') : '<p>Nenhum endereço cadastrado. <a href="perfil.php">Adicionar</a></p>';
 
-        fetch(`${API_BASE_URL}/users/get_addresses.php`)
-            .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    renderCheckout(result.data);
-                    const placeOrderBtn = document.getElementById('place-order-btn');
-                    if (placeOrderBtn) {
-                        placeOrderBtn.addEventListener('click', async () => {
-                            const selectedAddress = document.querySelector('input[name="address"]:checked');
-                            if (!selectedAddress) {
-                                alert('Selecione um endereço.');
-                                return;
-                            }
+                container.innerHTML = `
+                    <div class="checkout-layout">
+                        <div class="checkout-details">
+                            <h3>Endereço de Entrega</h3>
+                            <div class="address-selection">${addressesHTML}</div>
+                        </div>
+                        <div class="checkout-summary">
+                            <h3>Resumo do Pedido</h3>
+                            <div class="summary-items">${cart.map(item => `
+                                <div class="summary-item">
+                                    <img src="${item.image}" alt="${item.name}">
+                                    <div class="summary-item-details">
+                                        <p>${item.name}${item.size ? ` (${item.size})` : ''}</p>
+                                        <span>${item.quantity} x ${formatPrice(item.price)}</span>
+                                    </div>
+                                </div>`).join('')}
+                            </div>
+                            <div class="summary-total">
+                                <strong>Total:</strong>
+                                <strong>${formatPrice(total)}</strong>
+                            </div>
+                            <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Finalizar Pedido</button>
+                        </div>
+                    </div>`;
 
-                            placeOrderBtn.disabled = true;
-                            placeOrderBtn.textContent = 'Processando...';
+                const placeOrderBtn = document.getElementById('place-order-btn');
+                if (placeOrderBtn) {
+                    placeOrderBtn.addEventListener('click', async () => {
+                        const selectedAddress = document.querySelector('input[name="address"]:checked');
+                        if (!selectedAddress) {
+                            alert('Por favor, selecione um endereço de entrega.');
+                            return;
+                        }
 
-                            const response = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
+                        placeOrderBtn.disabled = true;
+                        placeOrderBtn.textContent = 'Processando...';
+
+                        try {
+                            const orderResponse = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
@@ -500,7 +582,7 @@ const header = document.getElementById("header");
                                     cart: cart
                                 })
                             });
-                            const orderResult = await response.json();
+                            const orderResult = await orderResponse.json();
 
                             if (orderResult.success) {
                                 cart = [];
@@ -508,20 +590,29 @@ const header = document.getElementById("header");
                                 updateCartCount();
                                 window.location.href = 'confirmation.php';
                             } else {
-                                alert('Erro: ' + orderResult.message);
-                                placeOrderBtn.disabled = false;
-                                placeOrderBtn.textContent = 'Finalizar Pedido';
+                                throw new Error(orderResult.message || 'Falha ao criar o pedido.');
                             }
-                        });
-                    }
+                        } catch (error) {
+                             alert('Erro: ' + error.message);
+                             placeOrderBtn.disabled = false;
+                             placeOrderBtn.textContent = 'Finalizar Pedido';
+                        }
+                    });
                 }
-            });
-        };
+            }
+        } catch (error) {
+            container.innerHTML = "<p>Erro ao carregar informações de checkout.</p>";
+        }
+    };
    
+    // =================================================================
+    // --- INICIALIZAÇÃO GERAL ---
+    // =================================================================
     const init = () => {
         updateUserIcon();
         updateCartCount();
-        lucide.createIcons();
+        initMobileMenu();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         initSearch();
         
         if (document.getElementById("home-products-grid")) initHomePage();
@@ -531,49 +622,6 @@ const header = document.getElementById("header");
         if (document.getElementById("profile-page-container")) initProfilePage();
         if (document.getElementById("carrinho-container")) renderCartPage();
         if (document.getElementById("checkout-container")) initCheckoutPage();
-
-        document.body.addEventListener("click", (e) => {
-            const target = e.target;
-            
-            if (target.matches('.add-cart-btn')) {
-                e.preventDefault();
-                if (!currentUser) {
-                    showLoginRequiredModal();
-                    return; 
-                }
-                
-                const productId = target.dataset.productId;
-                const existingItem = cart.find(item => item.productId === productId);
-
-                if (existingItem) {
-                    existingItem.quantity++;
-                } else {
-                    cart.push({
-                        productId,
-                        name: target.dataset.productName,
-                        price: parseFloat(target.dataset.productPrice),
-                        image: target.dataset.productImage,
-                        quantity: 1
-                    });
-                }
-                saveCart();
-                updateCartCount();
-                target.textContent = "Adicionado ✓";
-                target.classList.add("btn-success");
-                setTimeout(() => {
-                    target.textContent = "Adicionar ao Carrinho";
-                    target.classList.remove("btn-success");
-                }, 2000);
-            }
-
-            if (target.matches('.remove-cart-item-btn')) {
-                const itemIndex = parseInt(target.dataset.index, 10);
-                cart.splice(itemIndex, 1);
-                saveCart();
-                updateCartCount();
-                renderCartPage();
-            }
-        });
     };
 
     init();

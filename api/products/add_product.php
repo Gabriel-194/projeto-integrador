@@ -2,31 +2,76 @@
 require_once('../../connection.php');
 header('Content-Type: application/json');
 
-// Futuramente, adicione uma verificação de segurança para garantir que apenas administradores podem adicionar produtos.
+// Dados do formulário
+$nome = $_POST['nome'] ?? '';
+$descricao = $_POST['descricao'] ?? '';
+$preco = $_POST['preco'] ?? 0;
+$categoria_id = $_POST['categoria_id'] ?? 0;
+$tipo_produto = $_POST['tipo_produto'] ?? 'Roupa'; // Novo
+$tamanhos = $_POST['tamanhos'] ?? []; // Novo - será um array de IDs
 
-$data = json_decode(file_get_contents('php://input'), true);
-
-$nome = $data['nome'] ?? '';
-$descricao = $data['descricao'] ?? '';
-$preco = $data['preco'] ?? 0;
-$categoria_id = $data['categoria_id'] ?? 0;
-$imagem_principal = $data['imagem_principal'] ?? '';
-
-if (empty($nome) || $preco <= 0 || $categoria_id <= 0 || empty($imagem_principal)) {
-    echo json_encode(['success' => false, 'message' => 'Todos os campos são obrigatórios: Nome, Preço, Categoria e URL da Imagem.']);
+// Validações básicas
+if (empty($nome) || $preco <= 0 || $categoria_id <= 0 || !isset($_FILES['imagem_principal'])) {
+    echo json_encode(['success' => false, 'message' => 'Dados incompletos ou imagem faltando.']);
     exit;
 }
 
-$stmt = $conn->prepare("INSERT INTO produtos (nome, descricao, preco, categoria_id, imagem_principal) VALUES (?, ?, ?, ?, ?)");
-$stmt->bind_param("ssdis", $nome, $descricao, $preco, $categoria_id, $imagem_principal);
+// Lógica de upload de imagem (coloque seu código de upload aqui)
+$baseDir = dirname(__DIR__, 2);
+$uploadDir = $baseDir . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'produtos' . DIRECTORY_SEPARATOR;
+$dbPath = 'assets/produtos/';
+$fileName = uniqid() . '-' . basename($_FILES['imagem_principal']['name']);
+$targetPath = $uploadDir . $fileName;
+$finalDbPath = $dbPath . $fileName;
 
-if ($stmt->execute()) {
-    $newProductId = $stmt->insert_id;
-    echo json_encode(['success' => true, 'message' => 'Produto adicionado com sucesso!', 'new_product_id' => $newProductId]);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Erro ao adicionar o produto.']);
+// Inicia a transação
+$conn->begin_transaction();
+
+try {
+    // 1. Move o arquivo
+    if (!move_uploaded_file($_FILES['imagem_principal']['tmp_name'], $targetPath)) {
+        throw new Exception('Erro ao mover o arquivo de imagem.');
+    }
+
+    // 2. Insere o produto na tabela `produtos`
+    $stmt = $conn->prepare("INSERT INTO produtos (nome, descricao, preco, categoria_id, tipo_produto, imagem_principal) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssdiss", $nome, $descricao, $preco, $categoria_id, $tipo_produto, $finalDbPath);
+    $stmt->execute();
+    
+    // Pega o ID do produto que acabou de ser inserido
+    $newProductId = $conn->insert_id;
+    $stmt->close();
+    
+    if ($newProductId <= 0) {
+        throw new Exception('Falha ao obter o ID do novo produto.');
+    }
+
+    // 3. Insere os tamanhos na tabela `produto_tamanhos` se houver algum
+    if (!empty($tamanhos)) {
+        $stmt_tamanhos = $conn->prepare("INSERT INTO produto_tamanhos (produto_id, tamanho_id) VALUES (?, ?)");
+        foreach ($tamanhos as $tamanho_id) {
+            // Validação para garantir que o ID é um número
+            if (is_numeric($tamanho_id)) {
+                $stmt_tamanhos->bind_param("ii", $newProductId, $tamanho_id);
+                $stmt_tamanhos->execute();
+            }
+        }
+        $stmt_tamanhos->close();
+    }
+
+    // Se tudo deu certo, confirma as operações
+    $conn->commit();
+    echo json_encode(['success' => true, 'message' => 'Produto e seus tamanhos foram adicionados com sucesso!']);
+
+} catch (Exception $e) {
+    // Se algo deu errado, desfaz todas as operações
+    $conn->rollback();
+    // Opcional: deleta o arquivo que foi upado se a transação falhar
+    if (file_exists($targetPath)) {
+        unlink($targetPath);
+    }
+    echo json_encode(['success' => false, 'message' => 'Erro ao salvar o produto: ' . $e->getMessage()]);
 }
 
-$stmt->close();
 $conn->close();
 ?>

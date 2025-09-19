@@ -139,3 +139,41 @@ ADD COLUMN ativo BOOLEAN NOT NULL DEFAULT TRUE AFTER preco;
 
 -- Opcional: Se você já tem produtos, certifique-se de que eles estejam ativos por padrão
 UPDATE produtos SET ativo = TRUE WHERE ativo IS NULL;
+
+-- ... (código anterior do banco) ...
+
+-- 5. TABELAS PARA GERENCIAMENTO DE TAMANHOS
+CREATE TABLE IF NOT EXISTS tamanhos (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    valor VARCHAR(10) NOT NULL UNIQUE,
+    tipo ENUM('Roupa', 'Calcado') NOT NULL,
+    ordem INT(11) NOT NULL, -- Para ordenar (ex: PP=1, P=2...)
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS produto_tamanhos (
+    produto_id INT(11) NOT NULL,
+    tamanho_id INT(11) NOT NULL,
+    PRIMARY KEY (produto_id, tamanho_id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    FOREIGN KEY (tamanho_id) REFERENCES tamanhos(id) ON DELETE CASCADE
+);
+
+-- Adiciona a coluna para diferenciar o tipo de produto
+ALTER TABLE produtos
+ADD COLUMN tipo_produto ENUM('Roupa', 'Calcado') NOT NULL DEFAULT 'Roupa' AFTER categoria_id;
+
+-- Insere os tamanhos padrão para Roupas e Calçados
+INSERT INTO `tamanhos` (`valor`, `tipo`, `ordem`) VALUES
+('PP', 'Roupa', 1),
+('P', 'Roupa', 2),
+('M', 'Roupa', 3),
+('G', 'Roupa', 4),
+('GG', 'Roupa', 5),
+('37', 'Calcado', 1),
+('38', 'Calcado', 2),
+('39', 'Calcado', 3),
+('40', 'Calcado', 4),
+('41', 'Calcado', 5),
+('42', 'Calcado', 6),
+('43', 'Calcado', 7);
