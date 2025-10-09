@@ -177,3 +177,138 @@ INSERT INTO `tamanhos` (`valor`, `tipo`, `ordem`) VALUES
 ('41', 'Calcado', 5),
 ('42', 'Calcado', 6),
 ('43', 'Calcado', 7);
+
+-- =================================================================
+-- SEEDING: PRODUTOS 'blusa_essence' (VERSÃO PREMIUM)
+-- (Com descrições detalhadas e preços elevados)
+-- =================================================================
+
+-- 1. Blusa Umbro
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Blusa Umbro Pro Training Azul Marinho', 'Desenvolvida para atletas que não abrem mão do estilo, esta blusa Umbro combina tecnologia de tecido respirável com um corte ergonômico que garante total liberdade de movimento. O tom azul marinho profundo e o logo discreto a tornam uma peça versátil, perfeita tanto para o treino intenso quanto para compor um look casual moderno.', 349.90, 25, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/blusa_umbro.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: P, M, G
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+
+-- 2. Moletom Cortez Alcatraz
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Moletom Cortez Alcatraz Preto', 'Um verdadeiro ícone da cena urbana, o moletom Cortez Alcatraz é uma declaração de atitude. Confeccionado em algodão pesado de altíssima gramatura, ele oferece estrutura e conforto superiores. A estampa em alto relevo é um símbolo de exclusividade e pertencimento à cultura streetwear. Peça essencial para quem dita tendências.', 699.90, 20, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/moletom_cortez.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: M, G, GG
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G', 'GG');
+
+
+-- 3. Moletom Ed Hardy "Tiger" com Zíper
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Moletom Ed Hardy "Tiger" com Zíper', 'Resgatando a estética Y2K com um toque de luxo, este moletom Ed Hardy é uma obra de arte vestível. A icônica arte do tigre é aplicada com bordados de alta definição e detalhes em strass, criando um contraste vibrante contra o algodão preto premium. Com zíper robusto e modelagem clássica, é uma peça de declaração para quem não tem medo de ousar.', 899.90, 15, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/moletom_ed_hardy.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: Todos disponíveis para Roupa
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE tipo = 'Roupa';
+
+
+-- 4. Moletom Essentials "Cloud"
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Moletom Essentials "Cloud" Off-White', 'A tradução da sofisticação minimalista. Este moletom da linha Essentials, no tom "Cloud", é feito com um fleece de algodão ultra-macio que proporciona uma sensação de conforto incomparável. O corte impecável e a ausência de logos extravagantes fazem dele uma peça-chave atemporal, elevando qualquer guarda-roupa com simplicidade e elegância.', 749.90, 30, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/moletom_essentials.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: PP, P, M
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('PP', 'P', 'M');
+
+
+-- 5. Moletom Supreme x TNF "Summit Series"
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Moletom Supreme x TNF "Summit Series"', 'Item de colecionador e símbolo de status, este moletom da colaboração entre Supreme e The North Face é uma peça cobiçada mundialmente. Parte da "Summit Series", ele é construído com materiais técnicos de alta performance, projetado para durabilidade extrema sem sacrificar o estilo icônico. Possuir esta peça é deter uma parte da história do streetwear.', 1499.90, 10, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/moletom_supreme.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: G, GG
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('G', 'GG');
+
+
+-- 6. Jaqueta Nike Tech Fleece
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Jaqueta Nike Tech Fleece Cinza e Preto', 'Redefinindo o vestuário esportivo, a jaqueta Nike Tech Fleece oferece aquecimento premium sem adicionar peso ou volume. Seu inovador tecido de fleece de três camadas isola o calor corporal, enquanto o design articulado e o zíper assimétrico criam uma silhueta moderna e elegante. A fusão perfeita entre performance e estética urbana.', 789.90, 40, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/nike_teech.jpg', TRUE);
+-- (Mantido 'nike_teech.jpg' para corresponder ao seu arquivo)
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: P, M, G
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+
+-- FIM DO SEEDING
+-- =================================================================
+
+-- =================================================================
+-- SEEDING: PRODUTOS 'bermuda-essence' (VERSÃO PREMIUM - CORRIGIDO)
+-- =================================================================
+
+-- 1. Bermuda Ed Hardy Black
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Bermuda Ed Hardy "Death Before Dishonor"', 'Uma peça que exala atitude e a herança da tattoo art. Esta bermuda preta da Ed Hardy apresenta a icônica estampa "Death Before Dishonor" em grafismos prateados, criando um visual impactante. Feita em moletom de algodão grosso, oferece conforto máximo sem sacrificar o estilo arrojado.', 499.90, 30, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_ed_hardy_black.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: M, G
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
+
+
+-- 2. Bermuda Ed Hardy Brown
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Bermuda Ed Hardy "Love Kills Slowly" Marrom', 'A união perfeita entre o vintage e o contemporâneo. Em um raro tom de marrom terroso, esta bermuda destaca a famosa arte "Love Kills Slowly" de Don Ed Hardy. O tecido estonado confere um toque macio e uma aparência única, como se a peça contasse uma história. Ideal para quem busca exclusividade.', 529.90, 25, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_ed_hardy.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: P, M, G
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+
+-- 3. Bermuda Puma "Terracota"
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Bermuda Puma "Terracota" Performance', 'Projetada com uma estética minimalista e foco total em performance, esta bermuda da Puma na cor terracota é a escolha certa para o dia a dia. Seu tecido tecnológico de secagem rápida e o cós elástico garantem conforto e ajuste perfeito, enquanto o corte clean e a cor sólida a tornam extremamente versátil.', 379.90, 40, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_puma.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: Todos disponíveis para Roupa
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE tipo = 'Roupa';
+
+
+-- 4. Bermuda Rhude "Courtside"
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Bermuda Rhude "Courtside" Basketball', 'Inspirada na cultura do basquete de Los Angeles, a bermuda Rhude é um item de luxo streetwear. Com um design que remete aos shorts clássicos de quadra, ela é elevada por materiais premium, acabamento impecável e o logo arrojado. O cordão amarelo contrastante é a assinatura da marca, um detalhe que faz toda a diferença.', 950.00, 15, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_rhude.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: G, GG
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('G', 'GG');
+
+
+-- 5. Bermuda Tupode "Navy Script"
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Bermuda Tupode "Navy Script" Moletom', 'Representando a essência do conforto com identidade, esta bermuda azul marinho da Tupode é confeccionada em moletom careca de alta qualidade. O logo em estilo "script" bordado na perna confere um toque de sofisticação discreta. É a peça perfeita para um look relaxado, mas cheio de personalidade.', 449.90, 35, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_tupode.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: P, M
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M');
+
+
+-- 6. Bermuda Vans "Authentic"
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Bermuda Vans "Authentic" Chino Stretch', 'Um clássico da cultura skate, a bermuda chino da Vans é sinônimo de durabilidade e estilo atemporal. Feita com uma mistura de algodão e elastano, ela oferece o conforto e a flexibilidade necessários para o dia a dia. O corte reto e a cor caramelo a tornam uma base sólida para qualquer combinação.', 419.90, 50, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_vans.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: M, G, GG
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G', 'GG');
+
+
+-- FIM DO SEEDING
+-- =================================================================
