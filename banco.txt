@@ -114,21 +114,13 @@ DELETE FROM produtos;
 -- Passo 2: Reinicia o contador de ID da tabela de produtos para manter a organização.
 ALTER TABLE produtos AUTO_INCREMENT = 1;
 
--- Passo 3: Re-insere todos os produtos, atribuindo o 'categoria_id = 1' (Blusas) para todos eles.
--- (Assumindo que o ID da categoria 'BLUSAS' é 1, conforme a inserção anterior).
-INSERT INTO `produtos` (`nome`, `descricao`, `preco`, `estoque`, `categoria_id`, `imagem_principal`) VALUES
-('SDFM Classic Black', 'Hoodie premium com design minimalista e conforto excepcional. Feito com algodão de alta qualidade.', 149.99, 10, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg'),
-('SDFM Premium Gray', 'Hoodie cinza premium com acabamento superior e modelagem oversized.', 154.99, 10, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg'),
-('SDFM Signature Navy', 'Hoodie azul marinho da linha signature com logo bordado e capuz ajustável.', 159.99, 10, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg'),
-('SDFM Limited Edition', 'Edição limitada com design exclusivo e materiais premium. Numeração única.', 199.99, 5, 1, 'https://i.pinimg.com/736x/92/06/56/920656e03f09691d871e149b5dad8f7f.jpg');
 
 -- 5. ADICIONANDO CONTROLE DE ACESSO (ROLE)
+ALTER TABLE clientes ADD COLUMN role ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente' AFTER senha_hash;
 
-INSERT INTO cliente (id, nome_completo, email, senha_hash, role, cpf, data_cadastro) 
+INSERT INTO clientes (id, nome_completo, email, senha_hash, role, cpf, data_cadastro) 
 VALUES (NULL, 'admin', 'admin@gmail.com', 'admin1234', 'admin', NULL, '2025-08-29 15:50:13');
 
-ALTER TABLE clientes
-ADD COLUMN role ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente' AFTER senha_hash;
 
 -- Define o usuário com email 'admin@gmail.com' como administrador
 UPDATE clientes SET role = 'admin' WHERE email = 'admin@gmail.com';
@@ -262,7 +254,7 @@ SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
 
 -- 2. Bermuda Ed Hardy Brown
 INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
-('Bermuda Ed Hardy "Love Kills Slowly" Marrom', 'A união perfeita entre o vintage e o contemporâneo. Em um raro tom de marrom terroso, esta bermuda destaca a famosa arte "Love Kills Slowly" de Don Ed Hardy. O tecido estonado confere um toque macio e uma aparência única, como se a peça contasse uma história. Ideal para quem busca exclusividade.', 529.90, 25, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_ed_hardy.jpg', TRUE);
+('Bermuda Ed Hardy "Love Kills Slowly" Marrom', 'A união perfeita entre o vintage e o contemporâneo. Em um raro tom de marrom terroso, esta bermuda destaca a famosa arte "Love Kills Slowly" de Don Ed Hardy. O tecido estonado confere um toque macio e uma aparência única, como se a peça contasse uma história. Ideal para quem busca exclusividade.', 529.90, 25, (SELECT id FROM categorias WHERE nome = 'Bermudas'), 'Roupa', 'assets/produtos/bermuda_essence/bermuda_ed_hardy_marrom.jpg', TRUE);
 
 SET @last_product_id = LAST_INSERT_ID();
 -- Tamanhos: P, M, G
@@ -309,6 +301,280 @@ SET @last_product_id = LAST_INSERT_ID();
 INSERT INTO produto_tamanhos (produto_id, tamanho_id)
 SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G', 'GG');
 
+
+-- FIM DO SEEDING
+-- =================================================================
+
+-- =================================================================
+-- SEEDING: PRODUTOS 'camisetas_essence' (VERSÃO PREMIUM)
+-- =================================================================
+
+-- 1. Brasil Champions
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Brasil "Black Champions"', 'Celebrando a glória do futebol, esta camiseta reimagina o uniforme clássico em um tom preto imponente. Detalhes dourados e o brasão texturizado criam uma peça de luxo que une paixão esportiva e moda urbana. Confeccionada em algodão premium para um conforto inigualável.', 459.90, 40, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/brasil_champions.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G', 'GG');
+
+-- 2. Camisa Bape
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta BAPE "Psyche Camo"', 'Um ícone da cultura de Harajuku, a BAPE apresenta a estampa "Psyche Camo" em uma explosão de cores vibrantes. Esta camiseta é confeccionada no Japão com o algodão de altíssima qualidade característico da marca, garantindo durabilidade e um toque macio. Peça indispensável para colecionadores e entusiastas do streetwear.', 899.90, 20, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/camisa_bape.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
+
+-- 3. Camisa Nike
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Nike F.C. Dri-FIT', 'Inspirada na cultura do futebol global, a camiseta Nike F.C. combina performance e estilo. O tecido com tecnologia Dri-FIT afasta o suor da pele, mantendo o corpo seco e confortável, enquanto os grafismos arrojados e o logo dourado garantem um visual de destaque dentro e fora do campo.', 399.90, 50, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/camisa_nike.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+-- 4. Camiseta Palace
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Palace "Tri-Ferg" Branca', 'A simplicidade que define uma era. Esta camiseta branca da Palace apresenta o icônico logo "Tri-Ferg" nas costas, um símbolo instantaneamente reconhecível na cena do skate e do streetwear. Feita com algodão robusto, possui um caimento perfeito que melhora com o tempo. Um clássico moderno e essencial.', 699.90, 30, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/camiseta_palace.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE tipo = 'Roupa';
+
+-- 5. Camiseta Vale Dreams
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Vale Dreams "College"', 'Com uma estética que remete aos uniformes universitários vintage, esta camiseta da Vale Dreams é uma peça cheia de nostalgia e estilo. A estampa em alta definição e o tecido de algodão com lavagem especial conferem uma aparência e toque únicos, como uma peça de brechó de luxo.', 429.90, 25, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/camiseta_valeDreams.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G', 'GG');
+
+-- 6. Cortez
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Cortez "Corteiz Rules The World"', 'Direto das ruas de Londres, a Cortez (Corteiz) se estabeleceu como um fenômeno cultural. Esta camiseta preta, com a ousada declaração "Corteiz Rules The World", é um símbolo de autenticidade e pertencimento. Feita com algodão pesado, é uma peça durável e cheia de atitude.', 749.90, 22, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/cortez.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('G', 'GG');
+
+-- 7. Cortez Shirt
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camisa Cortez "Alcatraz Football" Azul', 'Inspirada nos uniformes de futebol dos anos 90, esta camisa da Cortez combina a estética esportiva com a identidade rebelde da marca. O tecido sintético brilhante, o logo "Alcatraz" e as cores vibrantes criam uma peça única que se destaca em qualquer multidão.', 859.90, 18, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/cortez_shirt.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
+
+-- 8. Helstar Shirt
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Vintage "Helstar World Tour"', 'Uma autêntica peça de colecionador para fãs de rock e da estética vintage. Esta camiseta apresenta uma estampa desbotada da turnê da banda Helstar, recriando com perfeição a aparência e o toque de uma camiseta de show dos anos 80. O algodão é macio e pré-encolhido para um ajuste perfeito.', 399.90, 35, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/helstar_shirt.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+-- 9. Jersey Sup
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Jersey Supreme "Hockey"', 'Diretamente das coleções mais cobiçadas da Supreme, esta jersey de hóquei é uma peça de alto impacto visual. Construída com malha atlética pesada e detalhes bordados de alta qualidade, ela transcende o esporte para se tornar um item de moda de luxo. Extremamente limitada e altamente desejada.', 1799.90, 10, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/jersey_sup.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('G', 'GG');
+
+-- 10. Jersey Supreme
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Jersey Supreme "Football 94"', 'Revivendo a estética do futebol americano dos anos 90, a Supreme lança esta jersey com o número 94, ano de fundação da marca. Feita com materiais autênticos de uniformes esportivos, é uma peça robusta e cheia de detalhes que celebram a história da marca. Um item obrigatório para os verdadeiros seguidores.', 1699.90, 12, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/jersey_supreme.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G', 'GG');
+
+-- 11. Jersey Total 90
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Jersey Nike "Total 90" Reissue', 'Uma reedição fiel de um dos uniformes mais icônicos da história do futebol. A linha "Total 90" da Nike marcou uma geração, e esta jersey resgata o design arrojado e os materiais da época. Uma peça nostálgica que conecta o esporte, a história e a moda.', 699.90, 28, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/jersey_total90.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+-- 12. Mad Shirt
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Mad "Multi-Logo" Nike', 'Uma peça de design experimental que brinca com a iconografia da Nike. Esta camiseta apresenta múltiplos logos Swoosh aplicados em diferentes técnicas e posições, criando um visual caótico e harmonioso ao mesmo tempo. Para quem entende que a moda também é uma forma de arte e desconstrução.', 549.90, 33, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/mad_shirt.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G', 'GG');
+
+-- 13. Nike Patta
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Camiseta Nike x Patta "Running Team"', 'Fruto da aclamada colaboração entre Nike e a boutique holandesa Patta, esta camiseta celebra a cultura da corrida de rua. Com tecidos técnicos leves e grafismos exclusivos que unem as identidades de ambas as marcas, é uma peça funcional e cheia de significado cultural.', 629.90, 25, (SELECT id FROM categorias WHERE nome = 'Camisetas'), 'Roupa', 'assets/produtos/camisetas_essence/nike_patta.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M');
+
+
+-- FIM DO SEEDING
+-- =================================================================
+
+-- =================================================================
+-- SEEDING: PRODUTOS 'tenis_essence' (NOVA SELEÇÃO PREMIUM)
+-- =================================================================
+
+-- 1. adidas Campus
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('adidas Campus 00s "Maroon"', 'Inspirado na cultura do skate dos anos 2000, o Campus 00s traz uma abordagem ousada a um clássico. Esta versão em "Maroon" destaca o cabedal de camurça premium e as listras contrastantes, sobre uma sola de borracha robusta que garante durabilidade e estilo atemporal.', 849.90, 30, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/adidas_campus.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('38', '39', '40', '41');
+
+-- 2. Air Force Flower
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Nike Air Force 1 ''07 "Floral Emblem"', 'Uma edição especial que celebra a beleza dos detalhes. Sobre a icônica silhueta branca do Air Force 1, esta versão apresenta emblemas florais delicadamente bordados, adicionando um toque de arte e exclusividade. Uma peça que combina a força do design clássico com a sutileza da natureza.', 999.90, 20, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/airforce_flower.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('37', '38', '39');
+
+-- 3. Air Force 1
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Nike Air Force 1 ''07 "Triple White"', 'O tênis mais icônico de todos os tempos. O Air Force 1 "Triple White" é a definição de um clássico absoluto. Seu design clean em couro branco, a silhueta inconfundível e a unidade de amortecimento Air-Sole o tornam a base perfeita para qualquer estilo, um verdadeiro pilar da cultura sneaker.', 949.90, 60, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/airforce1.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE tipo = 'Calcado';
+
+-- 4. Air Max 95
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Nike Air Max 95 "Solar Red"', 'Inspirado na anatomia humana, o Air Max 95 é uma obra-prima do design. A colorway "Solar Red" destaca as camadas onduladas da lateral e as unidades de Air visíveis no antepé e calcanhar. Uma combinação de conforto lendário e uma estética arrojada que continua a influenciar a moda urbana.', 1299.90, 25, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/airmax95.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('39', '40', '41', '42');
+
+-- 5. ASICS NYC
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('ASICS GEL-NYC "Olive Green"', 'Uma homenagem à cultura de corrida de Nova York, o GEL-NYC funde elementos de design de arquivo com tecnologia moderna. A paleta de cores "Olive Green" confere uma estética utilitária, enquanto a entressola com amortecimento GEL garante conforto superior para explorar a selva de pedra.', 1199.90, 22, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/asics_nyc.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('40', '41', '42', '43');
+
+-- 6. Bapesta Azul
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('A Bathing Ape BAPE STA "Royal Blue"', 'Um ícone do streetwear japonês, o BAPE STA é conhecido por sua estrela cadente e materiais de alta qualidade. Esta versão em couro "Royal Blue" e branco oferece um visual clássico e vibrante, representando a ousadia e a exclusividade da marca A Bathing Ape. Peça essencial para colecionadores.', 1899.90, 15, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/bapesta_azul.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('40', '41');
+
+-- 7. Bapesta Preto
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('A Bathing Ape BAPE STA Low "Patent Black"', 'Elevando o luxo a outro nível, esta versão do BAPE STA Low apresenta um cabedal completo em couro envernizado preto (patent leather). O acabamento brilhante cria um visual sofisticado e imponente, perfeito para ocasiões especiais. Uma fusão de streetwear com alta moda.', 2199.90, 10, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/bapesta-preto.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('39', '40', '41');
+
+-- 8. Jordan 11
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Air Jordan 11 "Space Jam"', 'Imortalizado nas quadras e nas telas de cinema, o Air Jordan 11 "Space Jam" é um dos tênis mais amados da história. O design revolucionário de Tinker Hatfield, com o couro envernizado e a sola translúcida, continua a ser um símbolo de performance e elegância. Um verdadeiro graal para qualquer colecionador.', 2499.90, 18, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/jordan11.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('40', '41', '42', '43');
+
+-- 9. NB 1906
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('New Balance 1906R "Vintage Navy"', 'Com uma estética que remete aos tênis de corrida de alta performance dos anos 2000, o 1906R é um tributo à inovação. A combinação de malha respirável, sobreposições sintéticas e a sola N-ergy oferece um pacote completo de estilo retrô e conforto tecnológico.', 1299.90, 28, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/nb_1906.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('39', '40', '41');
+
+-- 10. NB 740
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('New Balance 530 "Beige Angora"', 'O New Balance 530 captura a essência da estética "dad shoe" com perfeição. Esta colorway neutra em "Beige Angora" é extremamente versátil, enquanto a entressola com tecnologia ABZORB garante um amortecimento excepcional para o uso diário. Um best-seller que une conforto e tendência.', 949.90, 35, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/nb740.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('37', '38', '39', '40');
+
+-- 11. NB 1000
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('New Balance 990v3 "Olive Green"', 'Parte da lendária série 990, o v3 é reverenciado por seu conforto, qualidade de construção e design atemporal. Feito nos EUA com camurça premium e malha no tom "Olive Green", este tênis é um símbolo de sofisticação discreta e um favorito entre conhecedores de moda.', 1699.90, 16, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/nb-1000.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('41', '42', '43');
+
+-- 12. Nike Dunk
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Nike Dunk Low "Medium Curry"', 'Uma colorway altamente cobiçada, a "Medium Curry" veste o Dunk Low com materiais premium, incluindo painéis de camurça macia em tons terrosos. A combinação de cores sofisticada e a silhueta clássica fazem deste um dos Dunks mais elegantes e desejados do mercado.', 1499.90, 20, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/nikeDunk.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('39', '40', '41', '42');
+
+-- 13. P-6000
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Nike P-6000 "Metallic Silver & Blue"', 'Inspirado nos tênis de corrida da Nike do início dos anos 2000, o P-6000 combina sobreposições metálicas com malha respirável para um look retrô-futurista. O design arrojado e o conforto para o dia todo fazem dele uma escolha perfeita para quem busca um estilo diferenciado.', 979.90, 33, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/p_6000.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('38', '39', '40', '41');
+
+-- FIM DO SEEDING
+-- =================================================================
+
+-- =================================================================
+-- SEEDING: PRODUTOS 'calças_essence' (VERSÃO PREMIUM - NOMES CORRIGIDOS)
+-- =================================================================
+
+-- 1. Calça Cortez
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Cargo Cortez "Alcatraz" Preta', 'Sinônimo da cultura de rua londrina, esta calça cargo da Cortez é construída para durar. Feita com tecido ripstop pesado, oferece um caimento estruturado e funcionalidade com seus múltiplos bolsos. O logo "Alcatraz" bordado é a assinatura de autenticidade da marca mais cobiçada do momento.', 899.90, 30, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calça_cortez.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
+
+-- 2. Calça Nocta
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Nike NOCTA "Cardinal Stock" Preta', 'Fruto da colaboração com Drake, a linha NOCTA une performance e luxo. Esta calça é feita com um tecido técnico premium que oferece conforto e um visual elegante. Os detalhes refletivos e o branding minimalista em amarelo criam uma peça sofisticada para uso noturno e diurno.', 1199.90, 20, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calça_nocta.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+-- 3. Calça Piet
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Jeans Piet "Classic Light Wash"', 'Representando o design contemporâneo brasileiro, a Piet entrega um jeans de caimento impecável. Esta versão em lavagem clara ("light wash") é feita com denim de alta qualidade, oferecendo um visual clean e versátil. A etiqueta de couro e os detalhes de costura elevam o padrão da peça.', 749.90, 25, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calça_piet.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G', 'GG');
+
+-- 4. Calça Jeans
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Jeans Vintage "Sun-faded"', 'Com uma autêntica aparência desgastada pelo sol, esta calça jeans parece ter sido garimpada no melhor brechó de luxo. A lavagem única, os leves puídos e o corte reto criam uma peça cheia de personalidade, ideal para compor looks com uma pegada vintage e despojada.', 699.90, 35, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calçaJeans.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE tipo = 'Roupa';
+
+-- 5. Calça Jeans Clara
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Jeans "Sky Blue Denim"', 'A peça essencial para um guarda-roupa versátil. Este jeans de corte reto e lavagem azul clara ("sky blue") é a base perfeita para inúmeras combinações. O denim estruturado, mas confortável, garante um caimento elegante que se adapta a diferentes estilos, do casual ao mais arrumado.', 649.90, 40, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calçaJeansClara.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
+
+-- 6. Calça Nike Levis
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Jeans Nike x Levis "501 Reimagined"', 'Uma colaboração lendária que une dois gigantes. Esta peça reimagina o icônico jeans Levis 501 com a inovação da Nike. Detalhes como o Swoosh bordado no bolso e o patch de couro co-branded fazem desta uma peça de colecionador. O denim é tratado com tecnologias que garantem mais conforto e durabilidade.', 1499.90, 15, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calçaNikeLevis.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+-- 7. Calça Nike Supreme Preta
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Nike x Supreme "Ripstop Track Pant" Preta', 'A união perfeita entre a performance da Nike e o hype da Supreme. Construída com tecido ripstop leve e resistente, esta calça oferece durabilidade e conforto. O logo duplo bordado e os detalhes refletivos elevam o design, tornando-a uma das peças mais desejadas da colaboração.', 1599.90, 18, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calçaNikeSupreme.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G', 'GG');
+
+-- 8. Calça Nike Supreme Cinza
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Nike x Supreme "Ripstop Track Pant" Cinza', 'A versão cinza da aclamada calça da colaboração entre Nike e Supreme. O tom neutro destaca a qualidade do tecido ripstop e os detalhes de design, como os zíperes nos tornozelos e o branding colaborativo. Uma peça versátil que combina com os mais variados sneakers.', 1599.90, 18, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calçaNikeSupremeCinza.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
+
+-- 9. Calça Preta
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Utilitária "All Black"', 'Inspirada em uniformes táticos, esta calça utilitária preta é a definição de funcionalidade. Feita de sarja de algodão resistente, possui múltiplos bolsos estratégicos e joelhos articulados para maior mobilidade. O design "All Black" a torna uma peça coringa para um visual urbano e moderno.', 799.90, 33, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calçaPreta.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G', 'GG');
+
+-- 10. Calça Supreme
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Cargo Supreme "Vermelho Vibrante"', 'Para quem não tem medo de se destacar. Esta calça cargo da Supreme vem em um tom de vermelho vibrante que captura todos os olhares. Além da cor ousada, a peça é construída com a qualidade e os detalhes que definem a marca, incluindo o sutil, mas icônico, box logo. Uma peça statement para os verdadeiros fãs.', 1399.90, 12, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calçaSupreme.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
 
 -- FIM DO SEEDING
 -- =================================================================
