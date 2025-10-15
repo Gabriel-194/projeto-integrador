@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (homeGrid) {
             homeGrid.innerHTML = "<p>Carregando lançamentos...</p>";
             const allProducts = await fetchProducts();
-            renderProducts(homeGrid, allProducts.slice(0, 4));
+            renderProducts(homeGrid, allProducts.slice(0, 3));
         }
     };
 
@@ -508,6 +508,104 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    // const initCheckoutPage = async () => {
+    //     const container = document.getElementById('checkout-container');
+    //     if (!container) return;
+    //     if (!currentUser) { window.location.href = 'login.php'; return; }
+    //     if (cart.length === 0) {
+    //         container.innerHTML = '<p>Seu carrinho está vazio. Redirecionando...</p>';
+    //         setTimeout(() => window.location.href = 'loja.php', 2000);
+    //         return;
+    //     }
+
+    //     try {
+    //         const response = await fetch(`${API_BASE_URL}/users/get_addresses.php`);
+    //         const result = await response.json();
+
+    //         if (result.success) {
+    //             const addresses = result.data;
+    //             const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    //             const addressesHTML = addresses.length > 0 ? addresses.map((addr, index) => `
+    //                 <label class="address-option">
+    //                     <input type="radio" name="address" value="${addr.id}" ${index === 0 ? 'checked' : ''}>
+    //                     <div>
+    //                         <strong>${addr.logradouro}, ${addr.numero}</strong><br>
+    //                         ${addr.bairro}, ${addr.cidade} - ${addr.estado}<br>
+    //                         CEP: ${addr.cep}
+    //                     </div>
+    //                 </label>`).join('') : '<p>Nenhum endereço cadastrado. <a href="perfil.php">Adicionar</a></p>';
+
+    //             container.innerHTML = `
+    //                 <div class="checkout-layout">
+    //                     <div class="checkout-details">
+    //                         <h3>Endereço de Entrega</h3>
+    //                         <div class="address-selection">${addressesHTML}</div>
+    //                     </div>
+    //                     <div class="checkout-summary">
+    //                         <h3>Resumo do Pedido</h3>
+    //                         <div class="summary-items">${cart.map(item => `
+    //                             <div class="summary-item">
+    //                                 <img src="${item.image}" alt="${item.name}">
+    //                                 <div class="summary-item-details">
+    //                                     <p>${item.name}${item.size ? ` (${item.size})` : ''}</p>
+    //                                     <span>${item.quantity} x ${formatPrice(item.price)}</span>
+    //                                 </div>
+    //                             </div>`).join('')}
+    //                         </div>
+    //                         <div class="summary-total">
+    //                             <strong>Total:</strong>
+    //                             <strong>${formatPrice(total)}</strong>
+    //                         </div>
+    //                         <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Finalizar Pedido</button>
+    //                     </div>
+    //                 </div>`;
+
+    //             const placeOrderBtn = document.getElementById('place-order-btn');
+    //             if (placeOrderBtn) {
+    //                 placeOrderBtn.addEventListener('click', async () => {
+    //                     const selectedAddress = document.querySelector('input[name="address"]:checked');
+    //                     if (!selectedAddress) {
+    //                         alert('Por favor, selecione um endereço de entrega.');
+    //                         return;
+    //                     }
+
+    //                     placeOrderBtn.disabled = true;
+    //                     placeOrderBtn.textContent = 'Processando...';
+
+    //                     try {
+    //                         const orderResponse = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
+    //                             method: 'POST',
+    //                             headers: { 'Content-Type': 'application/json' },
+    //                             body: JSON.stringify({
+    //                                 address_id: selectedAddress.value,
+    //                                 cart: cart
+    //                             })
+    //                         });
+    //                         const orderResult = await orderResponse.json();
+
+    //                         if (orderResult.success) {
+    //                             cart = [];
+    //                             saveCart();
+    //                             updateCartCount();
+    //                             window.location.href = 'confirmation.php';
+    //                         } else {
+    //                             throw new Error(orderResult.message || 'Falha ao criar o pedido.');
+    //                         }
+    //                     } catch (error) {
+    //                          alert('Erro: ' + error.message);
+    //                          placeOrderBtn.disabled = false;
+    //                          placeOrderBtn.textContent = 'Finalizar Pedido';
+    //                     }
+    //                 });
+    //             }
+    //         }
+    //     } catch (error) {
+    //         container.innerHTML = "<p>Erro ao carregar informações de checkout.</p>";
+    //     }
+    // };
+
+
     const initCheckoutPage = async () => {
         const container = document.getElementById('checkout-container');
         if (!container) return;
@@ -541,6 +639,17 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="checkout-details">
                             <h3>Endereço de Entrega</h3>
                             <div class="address-selection">${addressesHTML}</div>
+                            
+                            <h3 style="margin-top: 2rem;">Forma de Pagamento</h3>
+                            <div class="address-selection">
+                                <label class="address-option">
+                                    <input type="radio" name="payment_method" value="pix" checked>
+                                    <div>
+                                        <strong>PIX</strong><br>
+                                        Pagamento instantâneo.
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                         <div class="checkout-summary">
                             <h3>Resumo do Pedido</h3>
@@ -557,51 +666,95 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <strong>Total:</strong>
                                 <strong>${formatPrice(total)}</strong>
                             </div>
-                            <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Finalizar Pedido</button>
+                            <button id="place-order-btn" class="btn-primary" ${addresses.length === 0 ? 'disabled' : ''}>Ir para Pagamento</button>
                         </div>
                     </div>`;
 
                 const placeOrderBtn = document.getElementById('place-order-btn');
                 if (placeOrderBtn) {
-                    placeOrderBtn.addEventListener('click', async () => {
+                    placeOrderBtn.addEventListener('click', () => {
                         const selectedAddress = document.querySelector('input[name="address"]:checked');
                         if (!selectedAddress) {
                             alert('Por favor, selecione um endereço de entrega.');
                             return;
                         }
 
-                        placeOrderBtn.disabled = true;
-                        placeOrderBtn.textContent = 'Processando...';
+                        // Salva os dados do pedido no sessionStorage para usar na próxima página
+                        const orderData = {
+                            address_id: selectedAddress.value,
+                            cart: cart
+                        };
+                        sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
-                        try {
-                            const orderResponse = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    address_id: selectedAddress.value,
-                                    cart: cart
-                                })
-                            });
-                            const orderResult = await orderResponse.json();
-
-                            if (orderResult.success) {
-                                cart = [];
-                                saveCart();
-                                updateCartCount();
-                                window.location.href = 'confirmation.php';
-                            } else {
-                                throw new Error(orderResult.message || 'Falha ao criar o pedido.');
-                            }
-                        } catch (error) {
-                             alert('Erro: ' + error.message);
-                             placeOrderBtn.disabled = false;
-                             placeOrderBtn.textContent = 'Finalizar Pedido';
-                        }
+                        // Redireciona para a página de pagamento
+                        window.location.href = 'payment.php';
                     });
                 }
             }
         } catch (error) {
             container.innerHTML = "<p>Erro ao carregar informações de checkout.</p>";
+        }
+    };
+
+     const initPaymentPage = async () => {
+        const container = document.getElementById('payment-page-container');
+        if (!container) return;
+
+        const orderData = JSON.parse(sessionStorage.getItem('pendingOrder'));
+
+        if (!orderData || orderData.cart.length === 0) {
+            container.innerHTML = '<h1>Dados do pedido não encontrados. Redirecionando...</h1>';
+            setTimeout(() => window.location.href = 'carrinho.php', 2000);
+            return;
+        }
+
+        try {
+            // 1. Cria o pedido na API assim que a página carrega
+            const orderResponse = await fetch(`${API_BASE_URL}/orders/create_order.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+            const orderResult = await orderResponse.json();
+
+            if (!orderResult.success) {
+                throw new Error(orderResult.message || 'Falha ao criar o pedido.');
+            }
+
+            // 2. Se o pedido foi criado, exibe as informações do PIX e inicia o timer
+            const totalAmount = orderData.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const pixKey = "00020126330014br.gov.bcb.pix01111234567890102125204000053039865802BR5913NOME_DA_LOJA6008BRASILIA62070503***6304E1F4";
+           const qrCodeUrl = 'assets/qrCode.jpg';
+
+            document.getElementById('qr-code-img').src = qrCodeUrl;
+            document.getElementById('pix-code').textContent = pixKey;
+            document.getElementById('total-amount').textContent = formatPrice(totalAmount);
+            lucide.createIcons();
+
+            document.getElementById('copy-pix-code-btn').addEventListener('click', () => {
+                navigator.clipboard.writeText(pixKey).then(() => {
+                    alert('Código PIX copiado!');
+                });
+            });
+
+            // 3. Inicia o contador de 30 segundos
+            let seconds = 30;
+            const timerElement = document.getElementById('countdown-timer');
+            const interval = setInterval(() => {
+                seconds--;
+                timerElement.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    // Limpa o carrinho e o pedido pendente, depois redireciona
+                    localStorage.removeItem('essenceCart');
+                    sessionStorage.removeItem('pendingOrder');
+                    updateCartCount(); // Atualiza o contador do carrinho no header
+                    window.location.href = 'confirmation.php';
+                }
+            }, 1000);
+
+        } catch (error) {
+            container.innerHTML = `<h1>Erro ao processar pedido</h1><p style="text-align: center;">${error.message}</p>`;
         }
     };
    
@@ -622,6 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.getElementById("profile-page-container")) initProfilePage();
         if (document.getElementById("carrinho-container")) renderCartPage();
         if (document.getElementById("checkout-container")) initCheckoutPage();
+        if (document.getElementById("payment-page-container")) initPaymentPage();
     };
 
     init();

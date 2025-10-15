@@ -15,7 +15,7 @@ session_start();
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <?php include('header.php'); ?>
+   <!-- <?php include('header.php'); ?> -->
 
     <main>
         <div class="confirmation-page container">
@@ -31,7 +31,7 @@ session_start();
         </div>
     </main>
     
-    <?php include('footer.php'); ?>
+ <!-- <?php include('footer.php'); ?>  -->
     <script src="script.js"></script>
 </body>
 </html>

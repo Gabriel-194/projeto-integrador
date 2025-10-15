@@ -1,25 +1,23 @@
--- Recomendo apagar o banco de dados antigo para começar com a nova estrutura limpa.
--- DROP DATABASE IF EXISTS essence_wear_db;
-
--- 1. CRIAÇÃO E USO DO BANCO DE DADOS
-CREATE DATABASE IF NOT EXISTS essence_wear_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- RECRIE O BANCO DE DADOS DESDE O ZERO ---------------------------
+DROP DATABASE IF EXISTS essence_wear_db;
+CREATE DATABASE essence_wear_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE essence_wear_db;
 
--- 2. TABELAS DE GERENCIAMENTO DE USUÁRIOS (CLIENTES)
-
--- Tabela principal de clientes/usuários
-CREATE TABLE IF NOT EXISTS clientes (
+-- ==========================================
+-- 1. GERENCIAMENTO DE USUÁRIOS (CLIENTES)
+-- ==========================================
+CREATE TABLE clientes (
     id INT(11) NOT NULL AUTO_INCREMENT,
     nome_completo VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,  -- 'UNIQUE' impede e-mails duplicados
-    senha_hash VARCHAR(255) NOT NULL,   -- NUNCA guarde senhas em texto plano!
-    cpf VARCHAR(14) UNIQUE,             -- Ex: '123.456.789-00'
+    email VARCHAR(255) NOT NULL UNIQUE,
+    senha_hash VARCHAR(255) NOT NULL,
+    role ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente',
+    cpf VARCHAR(14) UNIQUE,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
--- Tabela de endereços (um cliente pode ter vários)
-CREATE TABLE IF NOT EXISTS enderecos (
+CREATE TABLE enderecos (
     id INT(11) NOT NULL AUTO_INCREMENT,
     cliente_id INT(11) NOT NULL,
     logradouro VARCHAR(255) NOT NULL,
@@ -28,48 +26,67 @@ CREATE TABLE IF NOT EXISTS enderecos (
     bairro VARCHAR(100) NOT NULL,
     cidade VARCHAR(100) NOT NULL,
     estado CHAR(2) NOT NULL,
-    cep VARCHAR(9) NOT NULL,            -- Ex: '12345-678'
+    cep VARCHAR(9) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 );
 
--- Tabela de telefones (um cliente pode ter vários)
-CREATE TABLE IF NOT EXISTS telefones (
+CREATE TABLE telefones (
     id INT(11) NOT NULL AUTO_INCREMENT,
     cliente_id INT(11) NOT NULL,
-    numero VARCHAR(20) NOT NULL,        -- Ex: '(41) 99999-8888'
+    numero VARCHAR(20) NOT NULL,
     tipo ENUM('Celular', 'Fixo', 'Trabalho') DEFAULT 'Celular',
     PRIMARY KEY (id),
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 );
 
--- 3. TABELAS DO CATÁLOGO DE PRODUTOS (ESTRUTURA MELHORADA)
-
--- Tabela dedicada para categorias
-CREATE TABLE IF NOT EXISTS categorias (
+-- ==========================================
+-- 2. CATÁLOGO DE PRODUTOS
+-- ==========================================
+CREATE TABLE categorias (
     id INT(11) NOT NULL AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL UNIQUE,
     PRIMARY KEY (id)
 );
 
--- Tabela de produtos, agora ligada a 'categorias'
-CREATE TABLE IF NOT EXISTS produtos (
+-- 2.1. TABELA TAMANHOS
+CREATE TABLE tamanhos (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    valor VARCHAR(10) NOT NULL UNIQUE,
+    tipo ENUM('Roupa', 'Calcado') NOT NULL,
+    ordem INT(11) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+-- 2.2. PRODUTOS (com os campos já previstos!)
+CREATE TABLE produtos (
     id INT(11) NOT NULL AUTO_INCREMENT,
     nome VARCHAR(255) NOT NULL,
     descricao TEXT,
     preco DECIMAL(10, 2) NOT NULL,
-    estoque INT(11) NOT NULL DEFAULT 0, -- Controle de estoque
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    estoque INT(11) NOT NULL DEFAULT 0,
     categoria_id INT(11),
+    tipo_produto ENUM('Roupa', 'Calcado') NOT NULL DEFAULT 'Roupa',
     imagem_principal VARCHAR(255) NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL
 );
 
--- 4. TABELAS DE GERENCIAMENTO DE PEDIDOS
+-- 2.3. PRODUTO_TAMANHOS (ligação N-N)
+CREATE TABLE produto_tamanhos (
+    produto_id INT(11) NOT NULL,
+    tamanho_id INT(11) NOT NULL,
+    PRIMARY KEY (produto_id, tamanho_id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    FOREIGN KEY (tamanho_id) REFERENCES tamanhos(id) ON DELETE CASCADE
+);
 
--- Tabela principal de pedidos
-CREATE TABLE IF NOT EXISTS pedidos (
+-- ==========================================
+-- 3. PEDIDOS
+-- ==========================================
+CREATE TABLE pedidos (
     id INT(11) NOT NULL AUTO_INCREMENT,
     cliente_id INT(11) NOT NULL,
     endereco_entrega_id INT(11) NOT NULL,
@@ -81,26 +98,23 @@ CREATE TABLE IF NOT EXISTS pedidos (
     FOREIGN KEY (endereco_entrega_id) REFERENCES enderecos(id)
 );
 
--- Tabela de itens do pedido (tabela de junção)
-CREATE TABLE IF NOT EXISTS itens_pedido (
+CREATE TABLE itens_pedido (
     id INT(11) NOT NULL AUTO_INCREMENT,
     pedido_id INT(11) NOT NULL,
     produto_id INT(11) NOT NULL,
     quantidade INT(11) NOT NULL,
-    preco_unitario DECIMAL(10, 2) NOT NULL, -- Preço no momento da compra
+    preco_unitario DECIMAL(10, 2) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
--- Passo 1: Limpa completamente a tabela de categorias atual para evitar conflitos.
--- Isto irá apagar "Casacos" e "Vestidos" que não estão no seu novo menu.
+-- ==========================================
+-- INSERT DAS CATEGORIAS E TAMANHOS
+-- ==========================================
 DELETE FROM categorias;
-
--- Passo 2: Reinicia o contador de ID para que as novas categorias comecem a partir do ID 1.
 ALTER TABLE categorias AUTO_INCREMENT = 1;
 
--- Passo 3: Insere as novas categorias exatamente como aparecem nos botões da sua loja.
 INSERT INTO categorias (nome) VALUES
 ('Blusa'),
 ('Camisetas'),
@@ -108,55 +122,7 @@ INSERT INTO categorias (nome) VALUES
 ('Calças'),
 ('Tenis');
 
--- Passo 1: Apaga todos os produtos existentes na tabela.
-DELETE FROM produtos;
-
--- Passo 2: Reinicia o contador de ID da tabela de produtos para manter a organização.
-ALTER TABLE produtos AUTO_INCREMENT = 1;
-
-
--- 5. ADICIONANDO CONTROLE DE ACESSO (ROLE)
-ALTER TABLE clientes ADD COLUMN role ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente' AFTER senha_hash;
-
-INSERT INTO clientes (id, nome_completo, email, senha_hash, role, cpf, data_cadastro) 
-VALUES (NULL, 'admin', 'admin@gmail.com', 'admin1234', 'admin', NULL, '2025-08-29 15:50:13');
-
-
--- Define o usuário com email 'admin@gmail.com' como administrador
-UPDATE clientes SET role = 'admin' WHERE email = 'admin@gmail.com';
-
--- 6. ADICIONANDO CONTROLE DE ATIVAÇÃO/EXCLUSÃO LÓGICA PARA PRODUTOS
-ALTER TABLE produtos
-ADD COLUMN ativo BOOLEAN NOT NULL DEFAULT TRUE AFTER preco;
-
--- Opcional: Se você já tem produtos, certifique-se de que eles estejam ativos por padrão
-UPDATE produtos SET ativo = TRUE WHERE ativo IS NULL;
-
--- ... (código anterior do banco) ...
-
--- 5. TABELAS PARA GERENCIAMENTO DE TAMANHOS
-CREATE TABLE IF NOT EXISTS tamanhos (
-    id INT(11) NOT NULL AUTO_INCREMENT,
-    valor VARCHAR(10) NOT NULL UNIQUE,
-    tipo ENUM('Roupa', 'Calcado') NOT NULL,
-    ordem INT(11) NOT NULL, -- Para ordenar (ex: PP=1, P=2...)
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS produto_tamanhos (
-    produto_id INT(11) NOT NULL,
-    tamanho_id INT(11) NOT NULL,
-    PRIMARY KEY (produto_id, tamanho_id),
-    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
-    FOREIGN KEY (tamanho_id) REFERENCES tamanhos(id) ON DELETE CASCADE
-);
-
--- Adiciona a coluna para diferenciar o tipo de produto
-ALTER TABLE produtos
-ADD COLUMN tipo_produto ENUM('Roupa', 'Calcado') NOT NULL DEFAULT 'Roupa' AFTER categoria_id;
-
--- Insere os tamanhos padrão para Roupas e Calçados
-INSERT INTO `tamanhos` (`valor`, `tipo`, `ordem`) VALUES
+INSERT INTO tamanhos (valor, tipo, ordem) VALUES
 ('PP', 'Roupa', 1),
 ('P', 'Roupa', 2),
 ('M', 'Roupa', 3),
@@ -169,6 +135,13 @@ INSERT INTO `tamanhos` (`valor`, `tipo`, `ordem`) VALUES
 ('41', 'Calcado', 5),
 ('42', 'Calcado', 6),
 ('43', 'Calcado', 7);
+
+-- ==========================================
+-- INSERT DE USUÁRIO ADMIN
+-- ==========================================
+INSERT INTO clientes (nome_completo, email, senha_hash, role, cpf, data_cadastro)
+VALUES ('admin', 'admin@gmail.com', 'admin1234', 'admin', NULL, '2025-08-29 15:50:13');
+
 
 -- =================================================================
 -- SEEDING: PRODUTOS 'blusa_essence' (VERSÃO PREMIUM)
@@ -214,15 +187,6 @@ SET @last_product_id = LAST_INSERT_ID();
 INSERT INTO produto_tamanhos (produto_id, tamanho_id)
 SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('PP', 'P', 'M');
 
-
--- 5. Moletom Supreme x TNF "Summit Series"
-INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
-('Moletom Supreme x TNF "Summit Series"', 'Item de colecionador e símbolo de status, este moletom da colaboração entre Supreme e The North Face é uma peça cobiçada mundialmente. Parte da "Summit Series", ele é construído com materiais técnicos de alta performance, projetado para durabilidade extrema sem sacrificar o estilo icônico. Possuir esta peça é deter uma parte da história do streetwear.', 1499.90, 10, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/moletom_supreme.jpg', TRUE);
-
-SET @last_product_id = LAST_INSERT_ID();
--- Tamanhos: G, GG
-INSERT INTO produto_tamanhos (produto_id, tamanho_id)
-SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('G', 'GG');
 
 
 -- 6. Jaqueta Nike Tech Fleece
@@ -492,12 +456,6 @@ INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produt
 SET @last_product_id = LAST_INSERT_ID();
 INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('39', '40', '41', '42');
 
--- 13. P-6000
-INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
-('Nike P-6000 "Metallic Silver & Blue"', 'Inspirado nos tênis de corrida da Nike do início dos anos 2000, o P-6000 combina sobreposições metálicas com malha respirável para um look retrô-futurista. O design arrojado e o conforto para o dia todo fazem dele uma escolha perfeita para quem busca um estilo diferenciado.', 979.90, 33, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/p_6000.jpg', TRUE);
-
-SET @last_product_id = LAST_INSERT_ID();
-INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('38', '39', '40', '41');
 
 -- FIM DO SEEDING
 -- =================================================================
@@ -513,12 +471,6 @@ INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produt
 SET @last_product_id = LAST_INSERT_ID();
 INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('M', 'G');
 
--- 2. Calça Nocta
-INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
-('Calça Nike NOCTA "Cardinal Stock" Preta', 'Fruto da colaboração com Drake, a linha NOCTA une performance e luxo. Esta calça é feita com um tecido técnico premium que oferece conforto e um visual elegante. Os detalhes refletivos e o branding minimalista em amarelo criam uma peça sofisticada para uso noturno e diurno.', 1199.90, 20, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calça_nocta.jpg', TRUE);
-
-SET @last_product_id = LAST_INSERT_ID();
-INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');
 
 -- 3. Calça Piet
 INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
@@ -578,3 +530,26 @@ INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, i
 
 -- FIM DO SEEDING
 -- =================================================================
+
+-- 5. Moletom Supreme x TNF "Summit Series"
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Moletom Supreme x TNF "Summit Series"', 'Item de colecionador e símbolo de status, este moletom da colaboração entre Supreme e The North Face é uma peça cobiçada mundialmente. Parte da "Summit Series", ele é construído com materiais técnicos de alta performance, projetado para durabilidade extrema sem sacrificar o estilo icônico. Possuir esta peça é deter uma parte da história do streetwear.', 1499.90, 10, (SELECT id FROM categorias WHERE nome = 'Blusa'), 'Roupa', 'assets/produtos/blusa_essence/moletom_supreme.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+-- Tamanhos: G, GG
+INSERT INTO produto_tamanhos (produto_id, tamanho_id)
+SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('G', 'GG');
+
+-- 13. P-6000
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Nike P-6000 "Metallic Silver & Blue"', 'Inspirado nos tênis de corrida da Nike do início dos anos 2000, o P-6000 combina sobreposições metálicas com malha respirável para um look retrô-futurista. O design arrojado e o conforto para o dia todo fazem dele uma escolha perfeita para quem busca um estilo diferenciado.', 979.90, 33, (SELECT id FROM categorias WHERE nome = 'Tenis'), 'Calcado', 'assets/produtos/tenis_essence/p_6000.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('38', '39', '40', '41');
+
+-- 2. Calça Nocta
+INSERT INTO produtos (nome, descricao, preco, estoque, categoria_id, tipo_produto, imagem_principal, ativo) VALUES
+('Calça Nike NOCTA "Cardinal Stock" Preta', 'Fruto da colaboração com Drake, a linha NOCTA une performance e luxo. Esta calça é feita com um tecido técnico premium que oferece conforto e um visual elegante. Os detalhes refletivos e o branding minimalista em amarelo criam uma peça sofisticada para uso noturno e diurno.', 1199.90, 20, (SELECT id FROM categorias WHERE nome = 'Calças'), 'Roupa', 'assets/produtos/calças_essence/calça_nocta.jpg', TRUE);
+
+SET @last_product_id = LAST_INSERT_ID();
+INSERT INTO produto_tamanhos (produto_id, tamanho_id) SELECT @last_product_id, id FROM tamanhos WHERE valor IN ('P', 'M', 'G');

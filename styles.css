@@ -1473,3 +1473,62 @@ body:not(.body-over-banner) .logo-text {
 .carousel-next-btn {
     right: -10px;
 }
+
+/* =================================== */
+/* PÁGINA DE PAGAMENTO PIX             */
+/* =================================== */
+.payment-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+}
+.payment-box {
+    background-color: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.5rem;
+    padding: 2rem 3rem;
+    max-width: 500px;
+    width: 100%;
+}
+.payment-box h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+.payment-box p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+#qr-code-img {
+    max-width: 250px;
+    margin: 0 auto 1.5rem auto;
+    display: block;
+}
+.pix-code-box {
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-family: monospace;
+    word-wrap: break-word;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    word-break: break-all;
+}
+#copy-pix-code-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 1rem;
+}
+.payment-box h4 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+#countdown-timer {
+    font-weight: 700;
+    color: #0a0a0a;
+}
